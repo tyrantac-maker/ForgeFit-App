@@ -84,7 +84,11 @@ class UserProfile(BaseModel):
 class ProfileUpdate(BaseModel):
     age: Optional[int] = None
     height: Optional[float] = None
+    height_feet: Optional[int] = None
+    height_inches: Optional[int] = None
+    height_unit: Optional[str] = None  # 'cm' or 'ft_in'
     weight: Optional[float] = None
+    weight_unit: Optional[str] = None  # 'kg', 'lbs', 'stone'
     country: Optional[str] = None
     location: Optional[str] = None
     fitness_level: Optional[str] = None
@@ -94,6 +98,7 @@ class ProfileUpdate(BaseModel):
     training_location: Optional[str] = None
     gym_name: Optional[str] = None
     equipment: Optional[List[Dict[str, Any]]] = None
+    custom_equipment: Optional[List[Dict[str, Any]]] = None
     schedule: Optional[Dict[str, Any]] = None
     workout_preferences: Optional[Dict[str, Any]] = None
     profile_complete: Optional[bool] = None
@@ -454,6 +459,8 @@ EQUIPMENT_CATALOG = [
     {"name": "Pull-up Bar", "category": "bodyweight", "has_weight": False},
     {"name": "Dip Bars", "category": "bodyweight", "has_weight": False},
     {"name": "Ab Wheel", "category": "bodyweight", "has_weight": False},
+    {"name": "Multi Position Push Up Board", "category": "bodyweight", "has_weight": False},
+    {"name": "Wonder Core 2 / Sit Up Ab Machine", "category": "bodyweight", "has_weight": False},
     {"name": "Jump Rope", "category": "cardio", "has_weight": False},
     {"name": "Bench (Flat)", "category": "benches", "has_weight": False},
     {"name": "Bench (Adjustable)", "category": "benches", "has_weight": False},
@@ -474,6 +481,9 @@ EQUIPMENT_CATALOG = [
     {"name": "Medicine Ball", "category": "functional", "has_weight": True},
     {"name": "Battle Ropes", "category": "functional", "has_weight": False},
     {"name": "TRX/Suspension Trainer", "category": "functional", "has_weight": False},
+    {"name": "Plyo Box", "category": "functional", "has_weight": False},
+    {"name": "Stability Ball", "category": "functional", "has_weight": False},
+    {"name": "Yoga Mat", "category": "recovery", "has_weight": False},
 ]
 
 @api_router.get("/equipment/catalog")
@@ -487,6 +497,34 @@ async def save_user_equipment(equipment: List[Dict[str, Any]], user: dict = Depe
         {"$set": {"equipment": equipment, "updated_at": datetime.now(timezone.utc)}}
     )
     return {"message": "Equipment saved", "equipment": equipment}
+
+@api_router.post("/equipment/custom")
+async def add_custom_equipment(equipment_data: Dict[str, Any], user: dict = Depends(get_current_user)):
+    """Add a custom equipment item that's not in the catalog"""
+    custom_item = {
+        "name": equipment_data.get("name"),
+        "category": equipment_data.get("category", "custom"),
+        "has_weight": equipment_data.get("has_weight", False),
+        "min_weight": equipment_data.get("min_weight", 0),
+        "max_weight": equipment_data.get("max_weight", 0),
+        "is_custom": True,
+        "user_id": user["user_id"]
+    }
+    
+    # Add to user's custom equipment list
+    await db.users.update_one(
+        {"user_id": user["user_id"]},
+        {
+            "$push": {"custom_equipment": custom_item},
+            "$set": {"updated_at": datetime.now(timezone.utc)}
+        }
+    )
+    return {"message": "Custom equipment added", "equipment": custom_item}
+
+@api_router.get("/equipment/custom")
+async def get_custom_equipment(user: dict = Depends(get_current_user)):
+    """Get user's custom equipment"""
+    return user.get("custom_equipment", [])
 
 # ==================== EXERCISE DATABASE ====================
 

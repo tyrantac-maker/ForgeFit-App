@@ -16,6 +16,7 @@ import { useAuthStore } from '../../src/store/authStore';
 import { useWorkoutStore, Workout, WorkoutExercise } from '../../src/store/workoutStore';
 import { Button } from '../../src/components/Button';
 import { Card } from '../../src/components/Card';
+import { ExerciseAnimation } from '../../src/components/ExerciseAnimation';
 import * as Speech from 'expo-speech';
 
 interface SetProgress {
@@ -314,6 +315,29 @@ export default function WorkoutSessionScreen() {
             </Text>
             <Text style={styles.exerciseName}>{currentExercise.exercise_name}</Text>
 
+            {/* Exercise Animation - Start and End positions */}
+            <View style={styles.animationContainer}>
+              <View style={styles.animationBox}>
+                <ExerciseAnimation 
+                  exerciseName={currentExercise.exercise_name} 
+                  position="start" 
+                  size={70}
+                />
+                <Text style={styles.animationLabel}>START</Text>
+              </View>
+              <View style={styles.animationArrow}>
+                <Ionicons name="arrow-forward" size={24} color="#00FF88" />
+              </View>
+              <View style={styles.animationBox}>
+                <ExerciseAnimation 
+                  exerciseName={currentExercise.exercise_name} 
+                  position="end" 
+                  size={70}
+                />
+                <Text style={styles.animationLabel}>END</Text>
+              </View>
+            </View>
+
             <View style={styles.setInfo}>
               <View style={styles.setCircle}>
                 <Text style={styles.setNumber}>{currentSetIndex + 1}</Text>
@@ -611,7 +635,32 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     textAlign: 'center',
+    marginBottom: 16,
+  },
+  animationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
     marginBottom: 24,
+    padding: 16,
+    backgroundColor: 'rgba(0, 255, 136, 0.05)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 255, 136, 0.2)',
+  },
+  animationBox: {
+    alignItems: 'center',
+  },
+  animationArrow: {
+    paddingHorizontal: 8,
+  },
+  animationLabel: {
+    color: '#00FF88',
+    fontSize: 10,
+    fontWeight: '700',
+    marginTop: 6,
+    letterSpacing: 1,
   },
   setInfo: {
     marginBottom: 32,

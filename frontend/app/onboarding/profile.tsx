@@ -21,8 +21,17 @@ export default function ProfileOnboarding() {
   const { user, updateProfile } = useAuthStore();
   
   const [age, setAge] = useState(user?.age?.toString() || '');
-  const [height, setHeight] = useState(user?.height?.toString() || '');
+  
+  // Height options
+  const [heightUnit, setHeightUnit] = useState<'cm' | 'ft_in'>(user?.height_unit || 'cm');
+  const [heightCm, setHeightCm] = useState(user?.height?.toString() || '');
+  const [heightFeet, setHeightFeet] = useState(user?.height_feet?.toString() || '');
+  const [heightInches, setHeightInches] = useState(user?.height_inches?.toString() || '');
+  
+  // Weight options
+  const [weightUnit, setWeightUnit] = useState<'kg' | 'lbs' | 'stone'>(user?.weight_unit || 'kg');
   const [weight, setWeight] = useState(user?.weight?.toString() || '');
+  
   const [country, setCountry] = useState(user?.country || '');
   const [location, setLocation] = useState(user?.location || '');
   const [fitnessLevel, setFitnessLevel] = useState(user?.fitness_level || '');
@@ -34,9 +43,44 @@ export default function ProfileOnboarding() {
     { id: 'advanced', label: 'Advanced', description: '3+ years experience' },
   ];
 
+  // Convert height to cm for storage
+  const getHeightInCm = () => {
+    if (heightUnit === 'cm') {
+      return parseFloat(heightCm) || 0;
+    }
+    const feet = parseInt(heightFeet) || 0;
+    const inches = parseInt(heightInches) || 0;
+    return Math.round((feet * 30.48) + (inches * 2.54));
+  };
+
+  // Convert weight to kg for storage
+  const getWeightInKg = () => {
+    const w = parseFloat(weight) || 0;
+    if (weightUnit === 'kg') return w;
+    if (weightUnit === 'lbs') return Math.round(w * 0.453592 * 10) / 10;
+    if (weightUnit === 'stone') return Math.round(w * 6.35029 * 10) / 10;
+    return w;
+  };
+
   const handleContinue = async () => {
-    if (!age || !height || !weight || !fitnessLevel) {
-      Alert.alert('Required Fields', 'Please fill in all required fields');
+    if (!age || !fitnessLevel) {
+      Alert.alert('Required Fields', 'Please fill in age and fitness level');
+      return;
+    }
+
+    const heightInCm = getHeightInCm();
+    const weightInKg = getWeightInKg();
+
+    if (heightUnit === 'cm' && !heightCm) {
+      Alert.alert('Required Fields', 'Please enter your height');
+      return;
+    }
+    if (heightUnit === 'ft_in' && (!heightFeet || !heightInches)) {
+      Alert.alert('Required Fields', 'Please enter your height in feet and inches');
+      return;
+    }
+    if (!weight) {
+      Alert.alert('Required Fields', 'Please enter your weight');
       return;
     }
 
@@ -44,12 +88,16 @@ export default function ProfileOnboarding() {
     try {
       await updateProfile({
         age: parseInt(age),
-        height: parseFloat(height),
-        weight: parseFloat(weight),
+        height: heightInCm,
+        height_unit: heightUnit,
+        height_feet: heightUnit === 'ft_in' ? parseInt(heightFeet) : undefined,
+        height_inches: heightUnit === 'ft_in' ? parseInt(heightInches) : undefined,
+        weight: weightInKg,
+        weight_unit: weightUnit,
         country,
         location,
         fitness_level: fitnessLevel,
-        starting_weight: parseFloat(weight),
+        starting_weight: weightInKg,
         onboarding_step: 1,
       });
       router.push('/onboarding/goals');
@@ -82,32 +130,91 @@ export default function ProfileOnboarding() {
           </View>
 
           <View style={styles.form}>
-            <View style={styles.row}>
-              <View style={styles.halfInput}>
-                <Input
-                  label="Age *"
-                  placeholder="Years"
-                  value={age}
-                  onChangeText={setAge}
-                  keyboardType="numeric"
-                  icon="calendar-outline"
-                />
+            <Input
+              label="Age *"
+              placeholder="Enter your age"
+              value={age}
+              onChangeText={setAge}
+              keyboardType="numeric"
+              icon="calendar-outline"
+            />
+
+            {/* Height Section */}
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Height *</Text>
+              <View style={styles.unitToggle}>
+                <TouchableOpacity
+                  style={[styles.unitButton, heightUnit === 'cm' && styles.unitButtonActive]}
+                  onPress={() => setHeightUnit('cm')}
+                >
+                  <Text style={[styles.unitButtonText, heightUnit === 'cm' && styles.unitButtonTextActive]}>cm</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.unitButton, heightUnit === 'ft_in' && styles.unitButtonActive]}
+                  onPress={() => setHeightUnit('ft_in')}
+                >
+                  <Text style={[styles.unitButtonText, heightUnit === 'ft_in' && styles.unitButtonTextActive]}>ft/in</Text>
+                </TouchableOpacity>
               </View>
-              <View style={styles.halfInput}>
-                <Input
-                  label="Height (cm) *"
-                  placeholder="cm"
-                  value={height}
-                  onChangeText={setHeight}
-                  keyboardType="numeric"
-                  icon="resize-outline"
-                />
+            </View>
+
+            {heightUnit === 'cm' ? (
+              <Input
+                placeholder="Height in cm"
+                value={heightCm}
+                onChangeText={setHeightCm}
+                keyboardType="numeric"
+                icon="resize-outline"
+              />
+            ) : (
+              <View style={styles.row}>
+                <View style={styles.halfInput}>
+                  <Input
+                    placeholder="Feet"
+                    value={heightFeet}
+                    onChangeText={setHeightFeet}
+                    keyboardType="numeric"
+                    icon="resize-outline"
+                  />
+                </View>
+                <View style={styles.halfInput}>
+                  <Input
+                    placeholder="Inches"
+                    value={heightInches}
+                    onChangeText={setHeightInches}
+                    keyboardType="numeric"
+                  />
+                </View>
+              </View>
+            )}
+
+            {/* Weight Section */}
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Body Weight *</Text>
+              <View style={styles.unitToggle}>
+                <TouchableOpacity
+                  style={[styles.unitButton, weightUnit === 'kg' && styles.unitButtonActive]}
+                  onPress={() => setWeightUnit('kg')}
+                >
+                  <Text style={[styles.unitButtonText, weightUnit === 'kg' && styles.unitButtonTextActive]}>kg</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.unitButton, weightUnit === 'lbs' && styles.unitButtonActive]}
+                  onPress={() => setWeightUnit('lbs')}
+                >
+                  <Text style={[styles.unitButtonText, weightUnit === 'lbs' && styles.unitButtonTextActive]}>lbs</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.unitButton, weightUnit === 'stone' && styles.unitButtonActive]}
+                  onPress={() => setWeightUnit('stone')}
+                >
+                  <Text style={[styles.unitButtonText, weightUnit === 'stone' && styles.unitButtonTextActive]}>st</Text>
+                </TouchableOpacity>
               </View>
             </View>
 
             <Input
-              label="Current Weight (kg) *"
-              placeholder="Enter your weight"
+              placeholder={`Weight in ${weightUnit === 'stone' ? 'stone' : weightUnit}`}
               value={weight}
               onChangeText={setWeight}
               keyboardType="numeric"
@@ -135,7 +242,7 @@ export default function ProfileOnboarding() {
               </View>
             </View>
 
-            <Text style={styles.sectionTitle}>Fitness Level *</Text>
+            <Text style={styles.sectionTitleStandalone}>Fitness Level *</Text>
             <View style={styles.optionsContainer}>
               {fitnessLevels.map((level) => (
                 <TouchableOpacity
@@ -221,19 +328,53 @@ const styles = StyleSheet.create({
   form: {
     flex: 1,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    marginTop: 8,
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  sectionTitleStandalone: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 12,
+    marginTop: 8,
+  },
+  unitToggle: {
+    flexDirection: 'row',
+    backgroundColor: '#1A1A1A',
+    borderRadius: 8,
+    padding: 2,
+  },
+  unitButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  unitButtonActive: {
+    backgroundColor: '#FF6B35',
+  },
+  unitButtonText: {
+    color: '#888',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  unitButtonTextActive: {
+    color: '#fff',
+  },
   row: {
     flexDirection: 'row',
     gap: 12,
   },
   halfInput: {
     flex: 1,
-  },
-  sectionTitle: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 12,
-    marginTop: 8,
   },
   optionsContainer: {
     gap: 12,
