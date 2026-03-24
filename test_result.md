@@ -363,6 +363,9 @@ frontend:
       - working: true
         agent: "main"
         comment: "Full workout session with timers, rep failure, adjustment buttons, voice coaching"
+      - working: true
+        agent: "main"
+        comment: "VERIFIED via screenshots: Main exercise screen, Adjust modal (Too Tough/Heavy/Fast), Rep Failure modal with counter, Rest screen with countdown, Set progress tracking, Exercise transitions, Voice toggle"
 
   - task: "Progress Screen"
     implemented: true
