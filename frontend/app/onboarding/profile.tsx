@@ -108,8 +108,34 @@ export default function ProfileOnboarding() {
     }
   };
 
+  const handleBack = () => {
+    // If user is editing profile (already completed onboarding), go back
+    if (user?.profile_complete) {
+      router.back();
+    } else {
+      // If in initial onboarding, go to dashboard or home
+      router.replace('/(tabs)');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.headerSection}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+
+        <View style={styles.progressBar}>
+          <View style={[styles.progressFill, { width: '20%' }]} />
+        </View>
+
+        <View style={styles.header}>
+          <Text style={styles.step}>Step 1 of 5</Text>
+          <Text style={styles.title}>Let's Get to Know You</Text>
+          <Text style={styles.subtitle}>This helps us personalize your workouts</Text>
+        </View>
+      </View>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -119,15 +145,6 @@ export default function ProfileOnboarding() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: '20%' }]} />
-          </View>
-
-          <View style={styles.header}>
-            <Text style={styles.step}>Step 1 of 5</Text>
-            <Text style={styles.title}>Let's Get to Know You</Text>
-            <Text style={styles.subtitle}>This helps us personalize your workouts</Text>
-          </View>
 
           <View style={styles.form}>
             <Input
@@ -288,12 +305,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0A0A0A',
   },
+  headerSection: {
+    padding: 24,
+    paddingBottom: 0,
+  },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
     padding: 24,
+    paddingTop: 8,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#1A1A1A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
   progressBar: {
     height: 4,
@@ -307,7 +338,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   header: {
-    marginBottom: 32,
+    marginBottom: 16,
   },
   step: {
     color: '#FF6B35',
