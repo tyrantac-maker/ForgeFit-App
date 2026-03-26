@@ -1,22 +1,43 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../src/store/authStore';
 import { Button } from '../src/components/Button';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 
 export default function Index() {
   const router = useRouter();
   const { isAuthenticated, user, isLoading } = useAuthStore();
 
+  // 🌊 Background movement
+  const move = useSharedValue(0);
+
+  // ✨ Glow pulse
+  const glow = useSharedValue(0);
+
   useEffect(() => {
+    move.value = withRepeat(withTiming(1, { duration: 8000 }), -1, true);
+    glow.value = withRepeat(withTiming(1, { duration: 2000 }), -1, true);
+
     if (!isLoading && isAuthenticated && user) {
       if (user.profile_complete) {
         router.replace('/(tabs)');
       } else {
         const step = user.onboarding_step || 0;
-        const routes = ['onboarding/profile', 'onboarding/goals', 'onboarding/location', 'onboarding/equipment', 'onboarding/schedule'];
+        const routes = [
+          'onboarding/profile',
+          'onboarding/goals',
+          'onboarding/location',
+          'onboarding/equipment',
+          'onboarding/schedule',
+        ];
         if (step < routes.length) {
           router.replace(`/${routes[step]}` as any);
         } else {
@@ -26,17 +47,39 @@ export default function Index() {
     }
   }, [isAuthenticated, user, isLoading]);
 
+  const animatedMesh = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { translateX: move.value * 40 },
+        { translateY: move.value * 20 },
+      ],
+    };
+  });
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: 0.1 + glow.value * 0.4,
+  }));
+
   return (
     <LinearGradient
       colors={['#000000', '#050505', '#000000']}
       style={styles.container}
     >
+      {/* 🌊 Moving Mesh Background */}
+      <Animated.View style={[styles.meshBackground, animatedMesh]} />
+
+      {/* ✨ Glow Overlay */}
+      <Animated.View style={[styles.glowOverlay, glowStyle]} />
+
       <View style={styles.content}>
 
-        {/* LOGO + BRAND */}
+        {/* 🔥 LOGO */}
         <View style={styles.logoContainer}>
           <View style={styles.iconWrapper}>
-            <Ionicons name="fitness" size={64} color="#00FF88" />
+            <Image
+              source={require('../assets/images/logo.png')}
+              style={styles.logo}
+            />
           </View>
 
           <Text style={styles.title}>
@@ -48,7 +91,7 @@ export default function Index() {
           </Text>
         </View>
 
-        {/* FEATURES */}
+        {/* 💪 FEATURES */}
         <View style={styles.featuresContainer}>
           <View style={styles.featureItem}>
             <Ionicons name="sparkles" size={22} color="#00FF88" />
@@ -66,7 +109,7 @@ export default function Index() {
           </View>
         </View>
 
-        {/* BUTTONS */}
+        {/* 🚀 BUTTONS */}
         <View style={styles.buttonContainer}>
           <Button
             title="START FORGING"
@@ -94,6 +137,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  meshBackground: {
+    position: 'absolute',
+    width: '200%',
+    height: '200%',
+    backgroundColor: 'rgba(0,255,136,0.05)',
+  },
+
+  glowOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#00FF88',
+  },
+
   content: {
     flex: 1,
     paddingHorizontal: 24,
@@ -106,9 +163,9 @@ const styles = StyleSheet.create({
   },
 
   iconWrapper: {
-    width: 130,
-    height: 130,
-    borderRadius: 65,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
     backgroundColor: 'rgba(0,255,136,0.08)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -116,8 +173,14 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: 'rgba(0,255,136,0.4)',
     shadowColor: '#00FF88',
-    shadowOpacity: 0.6,
-    shadowRadius: 20,
+    shadowOpacity: 0.7,
+    shadowRadius: 25,
+  },
+
+  logo: {
+    width: 110,
+    height: 110,
+    resizeMode: 'contain',
   },
 
   title: {
