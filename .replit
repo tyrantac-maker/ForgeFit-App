@@ -1,0 +1,60 @@
+modules = ["nodejs-20"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
+exposeLocalhost = true
+
+[[ports]]
+localPort = 8081
+externalPort = 8081
+
+[agent]
+expertMode = true
+
+[nix]
+packages = ["nodejs-12_x"]
+channel = "stable-25_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start Backend"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start Frontend"
+
+[[workflows.workflow]]
+name = "Start Backend"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "mkdir -p /home/runner/data/mongodb && mongod --dbpath /home/runner/data/mongodb --port 27017 --fork --logpath /tmp/mongod.log; sleep 1; cd backend && PYTHONPATH=/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages /home/runner/workspace/.pythonlibs/bin/uvicorn server:app --host localhost --port 8000"
+
+[[workflows.workflow]]
+name = "Start Frontend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && RCT_METRO_PORT=5000 npx expo start --web --localhost"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
