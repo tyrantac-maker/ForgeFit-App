@@ -5,10 +5,6 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 8000
-externalPort = 8000
-
-[[ports]]
 localPort = 8081
 externalPort = 8081
 
@@ -40,20 +36,20 @@ name = "Start Backend"
 author = "agent"
 
 [workflows.workflow.metadata]
-outputType = "console"
+outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "mkdir -p /home/runner/data/mongodb && mongod --dbpath /home/runner/data/mongodb --port 27017 --fork --logpath /tmp/mongod.log; sleep 1; cd backend && PYTHONPATH=/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages /home/runner/workspace/.pythonlibs/bin/uvicorn server:app --host localhost --port 8000"
+args = "mkdir -p /home/runner/data/mongodb && mongod --dbpath /home/runner/data/mongodb --port 27017 --fork --logpath /tmp/mongod.log; sleep 1; cd backend && PYTHONPATH=/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages /home/runner/workspace/.pythonlibs/bin/uvicorn server:app --host 0.0.0.0 --port 5000"
+waitForPort = 5000
 
 [[workflows.workflow]]
 name = "Start Frontend"
 author = "agent"
 
 [workflows.workflow.metadata]
-outputType = "webview"
+outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd frontend && RCT_METRO_PORT=5000 npx expo start --tunnel --clear"
-waitForPort = 5000
+args = "cd frontend && RCT_METRO_PORT=8081 npx expo start --tunnel --clear"
