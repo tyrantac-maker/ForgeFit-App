@@ -29,7 +29,16 @@ export default function ProfileOnboarding() {
   const [heightFeet, setHeightFeet] = useState(user?.height_feet?.toString() || '');
   const [heightInches, setHeightInches] = useState(user?.height_inches?.toString() || '');
   const [weightUnit, setWeightUnit] = useState<'kg' | 'lbs' | 'stone'>(user?.weight_unit || 'kg');
-  const [weight, setWeight] = useState(user?.weight?.toString() || '');
+
+  const getInitialWeight = () => {
+    const kg = user?.weight;
+    if (!kg) return '';
+    const unit = user?.weight_unit || 'kg';
+    if (unit === 'lbs') return String(Math.round(kg * 2.20462 * 10) / 10);
+    if (unit === 'stone') return String(Math.round((kg / 6.35029) * 10) / 10);
+    return String(kg);
+  };
+  const [weight, setWeight] = useState(getInitialWeight());
   const [country, setCountry] = useState(user?.country || '');
   const [location, setLocation] = useState(user?.location || '');
   const [fitnessLevel, setFitnessLevel] = useState(user?.fitness_level || '');

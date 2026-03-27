@@ -14,6 +14,27 @@ import { useAuthStore } from '../../src/store/authStore';
 import { Card } from '../../src/components/Card';
 import { Button } from '../../src/components/Button';
 
+function formatHeight(user: any): string {
+  if (!user?.height) return '-';
+  if (user.height_unit === 'ft_in') {
+    const feet = user.height_feet ?? Math.floor(user.height / 30.48);
+    const inches = user.height_inches ?? Math.round((user.height % 30.48) / 2.54);
+    return `${feet}ft ${inches}in`;
+  }
+  return `${user.height} cm`;
+}
+
+function formatWeight(kg: number | undefined, unit: string | undefined, label: string): string {
+  if (!kg) return '-';
+  if (unit === 'lbs') {
+    return `${Math.round(kg * 2.20462 * 10) / 10} lbs`;
+  }
+  if (unit === 'stone') {
+    return `${Math.round((kg / 6.35029) * 10) / 10} st`;
+  }
+  return `${kg} kg`;
+}
+
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
@@ -69,8 +90,8 @@ export default function ProfileScreen() {
         <Card style={styles.card}>
           <Text style={styles.cardTitle}>Personal Info</Text>
           <ProfileItem icon="calendar-outline" label="Age" value={user?.age ? `${user.age} years` : '-'} />
-          <ProfileItem icon="resize-outline" label="Height" value={user?.height ? `${user.height} cm` : '-'} />
-          <ProfileItem icon="scale-outline" label="Weight" value={user?.weight ? `${user.weight} kg` : '-'} />
+          <ProfileItem icon="resize-outline" label="Height" value={formatHeight(user)} />
+          <ProfileItem icon="scale-outline" label="Weight" value={formatWeight(user?.weight, user?.weight_unit, 'weight')} />
           <ProfileItem icon="location-outline" label="Location" value={user?.location || user?.country || '-'} />
         </Card>
 

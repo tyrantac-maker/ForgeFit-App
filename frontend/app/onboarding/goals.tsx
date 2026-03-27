@@ -31,8 +31,26 @@ export default function GoalsOnboarding() {
   const router = useRouter();
   const { user, updateProfile } = useAuthStore();
 
+  const weightUnit = user?.weight_unit || 'kg';
+
+  const getInitialGoalWeight = () => {
+    const kg = user?.goal_weight;
+    if (!kg) return '';
+    if (weightUnit === 'lbs') return String(Math.round(kg * 2.20462 * 10) / 10);
+    if (weightUnit === 'stone') return String(Math.round((kg / 6.35029) * 10) / 10);
+    return String(kg);
+  };
+
+  const goalWeightToKg = (val: string) => {
+    const n = parseFloat(val);
+    if (isNaN(n)) return undefined;
+    if (weightUnit === 'lbs') return Math.round(n * 0.453592 * 10) / 10;
+    if (weightUnit === 'stone') return Math.round(n * 6.35029 * 10) / 10;
+    return n;
+  };
+
   const [selectedGoals, setSelectedGoals] = useState<string[]>(user?.goals || []);
-  const [goalWeight, setGoalWeight] = useState(user?.goal_weight?.toString() || '');
+  const [goalWeight, setGoalWeight] = useState(getInitialGoalWeight());
   const [loading, setLoading] = useState(false);
 
   const toggleGoal = (goalId: string) => {
@@ -50,7 +68,7 @@ export default function GoalsOnboarding() {
     try {
       await updateProfile({
         goals: selectedGoals,
-        goal_weight: goalWeight ? parseFloat(goalWeight) : undefined,
+        goal_weight: goalWeight ? goalWeightToKg(goalWeight) : undefined,
         onboarding_step: 2,
       });
       router.push('/onboarding/location');
@@ -119,9 +137,11 @@ export default function GoalsOnboarding() {
             </View>
 
             <View style={styles.weightGoalSection}>
-              <Text style={styles.sectionTitle}>Target Weight (Optional)</Text>
+              <Text style={styles.sectionTitle}>
+                Target Weight (Optional) — {weightUnit === 'stone' ? 'st' : weightUnit}
+              </Text>
               <Input
-                placeholder="Enter your goal weight in kg"
+                placeholder={`Goal weight in ${weightUnit === 'stone' ? 'stone' : weightUnit}`}
                 value={goalWeight}
                 onChangeText={setGoalWeight}
                 keyboardType="numeric"

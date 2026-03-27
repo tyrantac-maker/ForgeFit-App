@@ -604,6 +604,124 @@ async def get_available_exercises(user: dict = Depends(get_current_user)):
     
     return available
 
+# ==================== RULE-BASED WORKOUT GENERATOR ====================
+
+def generate_rule_based_workout_sync(request, user: dict) -> dict:
+    """Generate a structured workout without AI using exercise database and user profile."""
+    import random
+
+    fitness_level = user.get('fitness_level', 'beginner')
+    goals = user.get('goals', ['general_fitness'])
+    user_equipment = [e.get("name") for e in user.get("equipment", [])]
+
+    focus_areas = request.focus_areas if request.focus_areas else goals
+    duration = request.duration_minutes
+
+    # Filter available exercises
+    available = []
+    for ex in EXERCISE_DATABASE:
+        required = ex.get("equipment_required", [])
+        if not required or all(eq in user_equipment for eq in required):
+            available.append(ex)
+
+    if not available:
+        available = [ex for ex in EXERCISE_DATABASE if not ex.get("equipment_required")]
+
+    # Determine sets/reps/rest by fitness level and goal
+    if 'strength' in focus_areas:
+        sets, reps, rest = (5, 5, 120) if fitness_level == 'advanced' else (4, 6, 90)
+        workout_type = "full_body"
+    elif 'muscle_gain' in focus_areas:
+        sets, reps, rest = (4, 10, 75) if fitness_level != 'beginner' else (3, 12, 60)
+        workout_type = "upper"
+    elif 'fat_loss' in focus_areas or 'conditioning' in focus_areas:
+        sets, reps, rest = (3, 15, 45)
+        workout_type = "full_body"
+    else:
+        sets, reps, rest = (3, 12, 60)
+        workout_type = "full_body"
+
+    # Target muscle groups based on focus
+    goal_muscle_map = {
+        'muscle_gain': ['chest', 'back', 'shoulders', 'arms'],
+        'strength': ['legs', 'back', 'chest'],
+        'fat_loss': ['legs', 'core', 'chest', 'back'],
+        'conditioning': ['legs', 'core', 'chest'],
+        'endurance': ['legs', 'core'],
+        'calisthenics': ['chest', 'back', 'core', 'arms'],
+        'general_fitness': ['chest', 'back', 'legs', 'core', 'shoulders'],
+    }
+
+    target_muscles = []
+    for f in focus_areas:
+        target_muscles.extend(goal_muscle_map.get(f, ['chest', 'back', 'legs']))
+    target_muscles = list(dict.fromkeys(target_muscles))  # dedupe, preserve order
+
+    # Select exercises: prioritise target muscles, then fill with others
+    num_exercises = 5 if duration <= 45 else 6
+
+    selected = []
+    used_muscles = set()
+    for muscle in target_muscles:
+        candidates = [e for e in available if e['muscle_group'] == muscle and muscle not in used_muscles]
+        if candidates:
+            pick = random.choice(candidates)
+            selected.append(pick)
+            used_muscles.add(muscle)
+        if len(selected) >= num_exercises:
+            break
+
+    # Fill remaining slots
+    if len(selected) < num_exercises:
+        remaining = [e for e in available if e not in selected]
+        random.shuffle(remaining)
+        for ex in remaining:
+            if len(selected) >= num_exercises:
+                break
+            selected.append(ex)
+
+    # Build exercise list
+    exercises_out = []
+    for i, ex in enumerate(selected):
+        # Bodyweight exercises get null weight
+        needs_weight = bool(ex.get("equipment_required"))
+        weight_val = None
+        if needs_weight:
+            if 'strength' in focus_areas:
+                weight_val = 60.0 if fitness_level == 'advanced' else 40.0
+            elif 'muscle_gain' in focus_areas:
+                weight_val = 20.0 if fitness_level == 'beginner' else 40.0
+        note = "Start with a 5-minute warm-up before beginning." if i == 0 else None
+        exercises_out.append({
+            "exercise_name": ex["name"],
+            "sets": sets,
+            "reps": reps,
+            "weight": weight_val,
+            "rest_seconds": rest,
+            "notes": note,
+        })
+
+    # Choose workout name
+    primary_goal = focus_areas[0] if focus_areas else 'general_fitness'
+    name_map = {
+        'muscle_gain': 'Hypertrophy Builder',
+        'strength': 'Strength Session',
+        'fat_loss': 'Fat Burn Circuit',
+        'conditioning': 'Conditioning Blast',
+        'endurance': 'Endurance Grind',
+        'calisthenics': 'Bodyweight Flow',
+        'general_fitness': 'Full Body Session',
+    }
+    name = name_map.get(primary_goal, 'Custom Workout')
+
+    return {
+        "name": name,
+        "workout_type": workout_type,
+        "exercises": exercises_out,
+        "estimated_duration": duration,
+    }
+
+
 # ==================== WORKOUT ENDPOINTS ====================
 
 @api_router.post("/workouts")
@@ -662,7 +780,29 @@ async def generate_ai_workout(request: AIWorkoutRequest, user: dict = Depends(ge
     """Generate AI-powered workout based on user profile and preferences"""
     
     if not EMERGENT_LLM_KEY:
-        raise HTTPException(status_code=500, detail="AI service not configured")
+        # No AI key — use rule-based generator
+        workout_data = generate_rule_based_workout_sync(request, user)
+        exercises = []
+        for ex in workout_data.get("exercises", []):
+            exercises.append(WorkoutExercise(
+                exercise_id=str(uuid.uuid4()),
+                exercise_name=ex["exercise_name"],
+                sets=ex["sets"],
+                reps=ex["reps"],
+                weight=ex.get("weight"),
+                rest_seconds=ex.get("rest_seconds", 60),
+                notes=ex.get("notes"),
+            ))
+        workout = Workout(
+            user_id=user["user_id"],
+            name=workout_data["name"],
+            workout_type=workout_data["workout_type"],
+            exercises=exercises,
+            estimated_duration=workout_data["estimated_duration"],
+            ai_generated=False,
+        )
+        await db.workouts.insert_one(workout.dict())
+        return workout.dict()
     
     # Get available exercises for user
     user_equipment = [e.get("name") for e in user.get("equipment", [])]
@@ -793,8 +933,33 @@ async def generate_ai_workout(request: AIWorkoutRequest, user: dict = Depends(ge
         return workout.dict()
         
     except Exception as e:
-        logger.error(f"AI workout generation error: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to generate workout: {str(e)}")
+        logger.error(f"AI workout generation error: {e}, falling back to rule-based")
+        try:
+            workout_data = generate_rule_based_workout_sync(request, user)
+            exercises = []
+            for ex in workout_data.get("exercises", []):
+                exercises.append(WorkoutExercise(
+                    exercise_id=str(uuid.uuid4()),
+                    exercise_name=ex["exercise_name"],
+                    sets=ex["sets"],
+                    reps=ex["reps"],
+                    weight=ex.get("weight"),
+                    rest_seconds=ex.get("rest_seconds", 60),
+                    notes=ex.get("notes"),
+                ))
+            workout = Workout(
+                user_id=user["user_id"],
+                name=workout_data["name"],
+                workout_type=workout_data["workout_type"],
+                exercises=exercises,
+                estimated_duration=workout_data["estimated_duration"],
+                ai_generated=False,
+            )
+            await db.workouts.insert_one(workout.dict())
+            return workout.dict()
+        except Exception as e2:
+            logger.error(f"Rule-based generation also failed: {e2}")
+            raise HTTPException(status_code=500, detail="Failed to generate workout")
 
 # ==================== WORKOUT SESSION ENDPOINTS ====================
 

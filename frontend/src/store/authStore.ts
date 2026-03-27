@@ -10,7 +10,11 @@ export interface User {
   picture?: string;
   age?: number;
   height?: number;
+  height_unit?: 'cm' | 'ft_in';
+  height_feet?: number;
+  height_inches?: number;
   weight?: number;
+  weight_unit?: 'kg' | 'lbs' | 'stone';
   country?: string;
   location?: string;
   fitness_level?: string;
@@ -22,6 +26,7 @@ export interface User {
   equipment?: any[];
   schedule?: any;
   workout_preferences?: any;
+  workout_days?: string[];
   profile_complete?: boolean;
   onboarding_step?: number;
 }
