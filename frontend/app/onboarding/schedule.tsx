@@ -449,7 +449,7 @@ export default function ScheduleOnboarding() {
                         <Ionicons
                           name={muscle.icon as any}
                           size={16}
-                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#00FF88' : '#888'}
+                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#76FF00' : '#888'}
                         />
                         <Text style={[
                           styles.muscleChipText,
@@ -476,7 +476,7 @@ export default function ScheduleOnboarding() {
                         <Ionicons
                           name={muscle.icon as any}
                           size={16}
-                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#00FF88' : '#888'}
+                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#76FF00' : '#888'}
                         />
                         <Text style={[
                           styles.muscleChipText,
@@ -503,7 +503,7 @@ export default function ScheduleOnboarding() {
                         <Ionicons
                           name={muscle.icon as any}
                           size={16}
-                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#00FF88' : '#888'}
+                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#76FF00' : '#888'}
                         />
                         <Text style={[
                           styles.muscleChipText,
@@ -530,7 +530,7 @@ export default function ScheduleOnboarding() {
                         <Ionicons
                           name={muscle.icon as any}
                           size={16}
-                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#00FF88' : '#888'}
+                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#76FF00' : '#888'}
                         />
                         <Text style={[
                           styles.muscleChipText,
@@ -751,7 +751,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 255, 136, 0.3)',
   },
   muscleTagText: {
-    color: '#00FF88',
+    color: '#76FF00',
     fontSize: 12,
     fontWeight: '500',
   },
@@ -834,7 +834,7 @@ const styles = StyleSheet.create({
   },
   muscleChipSelected: {
     backgroundColor: 'rgba(0, 255, 136, 0.15)',
-    borderColor: '#00FF88',
+    borderColor: '#76FF00',
   },
   muscleChipText: {
     color: '#888',
@@ -842,7 +842,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   muscleChipTextSelected: {
-    color: '#00FF88',
+    color: '#76FF00',
   },
   modalDoneButton: {
     marginTop: 24,

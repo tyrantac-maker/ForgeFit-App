@@ -7,6 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { useAuthStore } from '../src/store/authStore';
 
+const BRAND_GREEN = '#76FF00';
+
 export default function Index() {
   const router = useRouter();
   const { isAuthenticated, user, isLoading } = useAuthStore();
@@ -30,7 +32,6 @@ export default function Index() {
           'onboarding/equipment',
           'onboarding/schedule',
         ];
-
         if (step < routes.length) {
           router.replace(`/${routes[step]}` as any);
         } else {
@@ -50,51 +51,45 @@ export default function Index() {
         nativeControls={false}
       />
 
-      {/* Main dark overlay */}
+      {/* Dark overlay */}
       <View style={styles.overlay} />
 
-      {/* Bottom black gradient fade for button readability */}
+      {/* Bottom gradient fade */}
       <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.92)', '#000000']}
-        locations={[0, 0.45, 0.8, 1]}
+        colors={['transparent', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,0.88)', '#000']}
+        locations={[0, 0.4, 0.75, 1]}
         style={styles.bottomFade}
       />
 
       {/* Main UI */}
       <View style={styles.content}>
+
+        {/* Logo — contains the FORGEFIT text, acts as the title */}
         <View style={styles.logoContainer}>
           <Image
             source={require('../assets/images/logo.png')}
             style={styles.logo}
             resizeMode="contain"
           />
-
-          <Text style={styles.title}>
-            FORGE<Text style={styles.green}>FIT</Text>
-          </Text>
-
-          <Text style={styles.subtitle}>
-            Build Your Strength. Forge Your Body.
-          </Text>
         </View>
 
+        {/* Feature highlights */}
         <View style={styles.featuresContainer}>
           <View style={styles.featureItem}>
-            <Ionicons name="sparkles" size={22} color="#00FF88" />
+            <Ionicons name="sparkles" size={20} color={BRAND_GREEN} />
             <Text style={styles.featureText}>AI Generated Workouts</Text>
           </View>
-
           <View style={styles.featureItem}>
-            <Ionicons name="analytics" size={22} color="#00FF88" />
+            <Ionicons name="analytics" size={20} color={BRAND_GREEN} />
             <Text style={styles.featureText}>Track Strength Progression</Text>
           </View>
-
           <View style={styles.featureItem}>
-            <Ionicons name="barbell" size={22} color="#00FF88" />
+            <Ionicons name="barbell" size={20} color={BRAND_GREEN} />
             <Text style={styles.featureText}>Train With Your Equipment</Text>
           </View>
         </View>
 
+        {/* Buttons */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.primaryButton}
@@ -112,6 +107,7 @@ export default function Index() {
             <Text style={styles.secondaryButtonText}>LOG IN</Text>
           </TouchableOpacity>
         </View>
+
       </View>
     </View>
   );
@@ -122,98 +118,67 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
-
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.48)',
+    backgroundColor: 'rgba(0,0,0,0.42)',
   },
-
   bottomFade: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    height: 260,
+    height: 300,
   },
-
   content: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 22,
     justifyContent: 'center',
+    paddingBottom: 20,
   },
-
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 42,
+    marginBottom: 36,
   },
-
   logo: {
-    width: 180,
-    height: 180,
-    marginBottom: 18,
+    width: '88%',
+    aspectRatio: 1,
   },
-
-  title: {
-    fontSize: 38,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 4,
-  },
-
-  green: {
-    color: '#00FF88',
-  },
-
-  subtitle: {
-    marginTop: 8,
-    fontSize: 14,
-    color: '#B5B5B5',
-    textAlign: 'center',
-    letterSpacing: 0.6,
-  },
-
   featuresContainer: {
-    gap: 14,
-    marginBottom: 42,
+    gap: 12,
+    marginBottom: 36,
   },
-
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    padding: 16,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    padding: 15,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(0,255,136,0.16)',
+    borderColor: 'rgba(118,255,0,0.18)',
   },
-
   featureText: {
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '500',
   },
-
   buttonContainer: {
-    gap: 14,
+    gap: 12,
   },
-
   primaryButton: {
     width: '100%',
-    backgroundColor: '#00FF88',
+    backgroundColor: '#76FF00',
     borderRadius: 14,
     paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   primaryButtonText: {
     color: '#000',
     fontSize: 16,
     fontWeight: '800',
     letterSpacing: 2,
   },
-
   secondaryButton: {
     width: '100%',
     borderRadius: 14,
@@ -221,12 +186,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
-    borderColor: '#00FF88',
+    borderColor: '#76FF00',
     backgroundColor: 'transparent',
   },
-
   secondaryButtonText: {
-    color: '#00FF88',
+    color: '#76FF00',
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: 1.5,

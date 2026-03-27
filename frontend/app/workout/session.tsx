@@ -326,7 +326,7 @@ export default function WorkoutSessionScreen() {
                 <Text style={styles.animationLabel}>START</Text>
               </View>
               <View style={styles.animationArrow}>
-                <Ionicons name="arrow-forward" size={24} color="#00FF88" />
+                <Ionicons name="arrow-forward" size={24} color="#76FF00" />
               </View>
               <View style={styles.animationBox}>
                 <ExerciseAnimation 
@@ -656,7 +656,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   animationLabel: {
-    color: '#00FF88',
+    color: '#76FF00',
     fontSize: 10,
     fontWeight: '700',
     marginTop: 6,
