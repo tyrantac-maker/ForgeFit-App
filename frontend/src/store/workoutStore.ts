@@ -43,14 +43,28 @@ export interface WorkoutSession {
   status: string;
 }
 
+export interface LibraryExercise {
+  id: string;
+  name: string;
+  muscle_group: string;
+  secondary_muscles: string[];
+  categories: string[];
+  equipment_required: string[];
+  difficulty: string;
+  instructions: string;
+  ai_suggested?: boolean;
+}
+
 interface WorkoutState {
   workouts: Workout[];
   currentSession: WorkoutSession | null;
-  exercises: any[];
+  exercises: LibraryExercise[];
   equipmentCatalog: any[];
   isLoading: boolean;
   fetchWorkouts: (token: string) => Promise<void>;
   createWorkout: (token: string, workout: any) => Promise<Workout>;
+  updateWorkout: (token: string, workoutId: string, workout: any) => Promise<Workout>;
+  deleteWorkout: (token: string, workoutId: string) => Promise<void>;
   generateAIWorkout: (token: string, params: any) => Promise<Workout>;
   startSession: (token: string, workoutId: string) => Promise<WorkoutSession>;
   updateSession: (token: string, sessionId: string, data: any) => Promise<void>;
@@ -58,6 +72,8 @@ interface WorkoutState {
   logRepFailure: (token: string, sessionId: string, failure: any) => Promise<void>;
   logAdjustment: (token: string, sessionId: string, adjustment: any) => Promise<void>;
   fetchExercises: (token: string) => Promise<void>;
+  fetchLibraryExercises: (token: string, params?: { muscle_group?: string; category?: string; equipment_only?: boolean }) => Promise<LibraryExercise[]>;
+  analyzeEquipment: (token: string, data: { equipment_name: string; equipment_url?: string; equipment_description?: string }) => Promise<{ analysis: string; exercises: LibraryExercise[]; ai_powered: boolean }>;
   fetchEquipmentCatalog: (token: string) => Promise<void>;
   setCurrentSession: (session: WorkoutSession | null) => void;
 }
@@ -94,10 +110,38 @@ export const useWorkoutStore = create<WorkoutState>((set, get) => ({
     });
 
     if (!response.ok) throw new Error('Failed to create workout');
-    
+
     const data = await response.json();
     set({ workouts: [...get().workouts, data] });
     return data;
+  },
+
+  updateWorkout: async (token: string, workoutId: string, workout: any) => {
+    const response = await fetch(`${API_URL}/api/workouts/${workoutId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(workout),
+    });
+
+    if (!response.ok) throw new Error('Failed to update workout');
+
+    const data = await response.json();
+    set({ workouts: get().workouts.map((w) => (w.id === workoutId ? data : w)) });
+    return data;
+  },
+
+  deleteWorkout: async (token: string, workoutId: string) => {
+    const response = await fetch(`${API_URL}/api/workouts/${workoutId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+
+    if (!response.ok) throw new Error('Failed to delete workout');
+
+    set({ workouts: get().workouts.filter((w) => w.id !== workoutId) });
   },
 
   generateAIWorkout: async (token: string, params: any) => {
@@ -114,7 +158,7 @@ export const useWorkoutStore = create<WorkoutState>((set, get) => ({
       const error = await response.json();
       throw new Error(error.detail || 'Failed to generate workout');
     }
-    
+
     const data = await response.json();
     set({ workouts: [...get().workouts, data] });
     return data;
@@ -127,7 +171,7 @@ export const useWorkoutStore = create<WorkoutState>((set, get) => ({
     });
 
     if (!response.ok) throw new Error('Failed to start session');
-    
+
     const data = await response.json();
     set({ currentSession: data });
     return data;
@@ -144,7 +188,7 @@ export const useWorkoutStore = create<WorkoutState>((set, get) => ({
     });
 
     if (!response.ok) throw new Error('Failed to update session');
-    
+
     const updated = await response.json();
     set({ currentSession: updated });
   },
@@ -160,7 +204,7 @@ export const useWorkoutStore = create<WorkoutState>((set, get) => ({
     });
 
     if (!response.ok) throw new Error('Failed to complete session');
-    
+
     set({ currentSession: null });
   },
 
@@ -192,6 +236,31 @@ export const useWorkoutStore = create<WorkoutState>((set, get) => ({
     });
     const data = await response.json();
     set({ exercises: data });
+  },
+
+  fetchLibraryExercises: async (token: string, params = {}) => {
+    const qs = new URLSearchParams();
+    if (params.muscle_group) qs.append('muscle_group', params.muscle_group);
+    if (params.category) qs.append('category', params.category);
+    if (params.equipment_only) qs.append('equipment_only', 'true');
+    const response = await fetch(`${API_URL}/api/exercises?${qs.toString()}`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!response.ok) return [];
+    return response.json();
+  },
+
+  analyzeEquipment: async (token: string, data) => {
+    const response = await fetch(`${API_URL}/api/exercises/analyze-equipment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Equipment analysis failed');
+    return response.json();
   },
 
   fetchEquipmentCatalog: async (token: string) => {
