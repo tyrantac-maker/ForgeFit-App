@@ -124,7 +124,7 @@ export default function WorkoutsScreen() {
                     <Ionicons
                       name={workout.ai_generated ? 'sparkles' : getWorkoutTypeIcon(workout.workout_type) as any}
                       size={24}
-                      color={workout.ai_generated ? '#FF6B35' : '#888'}
+                      color={workout.ai_generated ? '#76FF00' : '#888'}
                     />
                   </View>
                   <View style={styles.workoutInfo}>
@@ -196,7 +196,7 @@ export default function WorkoutsScreen() {
                   <Ionicons
                     name={focus.icon as any}
                     size={20}
-                    color={selectedFocus.includes(focus.id) ? '#FF6B35' : '#888'}
+                    color={selectedFocus.includes(focus.id) ? '#76FF00' : '#888'}
                   />
                   <Text style={[
                     styles.focusText,
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   workoutIconAI: {
-    backgroundColor: 'rgba(255, 107, 53, 0.2)',
+    backgroundColor: 'rgba(118,255,0,0.12)',
   },
   workoutInfo: {
     flex: 1,
@@ -311,13 +311,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: 'rgba(255, 107, 53, 0.2)',
+    backgroundColor: 'rgba(118,255,0,0.12)',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
   },
   dayBadgeText: {
-    color: '#FF6B35',
+    color: '#76FF00',
     fontSize: 10,
     fontWeight: '600',
   },
@@ -363,8 +363,8 @@ const styles = StyleSheet.create({
     borderColor: '#2A2A2A',
   },
   durationChipSelected: {
-    borderColor: '#FF6B35',
-    backgroundColor: 'rgba(255, 107, 53, 0.2)',
+    borderColor: '#76FF00',
+    backgroundColor: 'rgba(118,255,0,0.12)',
   },
   durationText: {
     color: '#888',
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   durationTextSelected: {
-    color: '#FF6B35',
+    color: '#76FF00',
   },
   focusOptions: {
     flexDirection: 'row',
@@ -392,8 +392,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   focusChipSelected: {
-    borderColor: '#FF6B35',
-    backgroundColor: 'rgba(255, 107, 53, 0.2)',
+    borderColor: '#76FF00',
+    backgroundColor: 'rgba(118,255,0,0.12)',
   },
   focusText: {
     color: '#888',
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   focusTextSelected: {
-    color: '#FF6B35',
+    color: '#76FF00',
   },
   generateModalButton: {
     marginTop: 8,

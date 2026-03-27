@@ -111,9 +111,9 @@ const EXERCISE_POSES: { [key: string]: { start: any; end: any } } = {
 };
 
 const MeshFigure: React.FC<{ pose: string; position: 'start' | 'end'; size: number }> = ({ pose, position, size }) => {
-  const strokeColor = '#39FF14';
+  const strokeColor = '#76FF00';
   const strokeWidth = 2;
-  const dotColor = '#39FF14';
+  const dotColor = '#76FF00';
   const scale = size / 100;
   
   // Get pose data
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 255, 136, 0.2)',
   },
   endLabel: {
-    backgroundColor: 'rgba(255, 107, 53, 0.2)',
+    backgroundColor: 'rgba(118,255,0,0.12)',
   },
   labelText: {
     fontSize: 8,

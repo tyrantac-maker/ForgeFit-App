@@ -90,7 +90,7 @@ export default function ProfileScreen() {
             <View style={styles.equipmentList}>
               {user.equipment.map((item: any, index: number) => (
                 <View key={index} style={styles.equipmentChip}>
-                  <Ionicons name="checkmark" size={14} color="#FF6B35" />
+                  <Ionicons name="checkmark" size={14} color="#76FF00" />
                   <Text style={styles.equipmentText}>{item.name}</Text>
                 </View>
               ))}
@@ -115,7 +115,7 @@ export default function ProfileScreen() {
         </Card>
 
         <TouchableOpacity style={styles.editButton} onPress={() => router.push('/onboarding/profile')}>
-          <Ionicons name="create-outline" size={20} color="#FF6B35" />
+          <Ionicons name="create-outline" size={20} color="#76FF00" />
           <Text style={styles.editButtonText}>Edit Profile</Text>
         </TouchableOpacity>
 
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   cardTitle: {
-    color: '#FF6B35',
+    color: '#76FF00',
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 12,
@@ -221,13 +221,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+    backgroundColor: 'rgba(118,255,0,0.08)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
   },
   equipmentText: {
-    color: '#FF6B35',
+    color: '#76FF00',
     fontSize: 12,
     fontWeight: '500',
   },
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   editButtonText: {
-    color: '#FF6B35',
+    color: '#76FF00',
     fontSize: 16,
     fontWeight: '600',
   },

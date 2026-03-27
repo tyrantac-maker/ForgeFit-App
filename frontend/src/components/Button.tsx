@@ -46,13 +46,13 @@ export const Button: React.FC<ButtonProps> = ({
         activeOpacity={0.8}
       >
         <LinearGradient
-          colors={disabled ? ['#555', '#444'] : ['#FF6B35', '#FF8F5C']}
+          colors={disabled ? ['#555', '#444'] : ['#8FFF2A', '#76FF00']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={[styles.gradient, sizeStyles[size]]}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#000" />
           ) : (
             <>
               {icon}
@@ -68,13 +68,13 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variantStyles = {
     secondary: { backgroundColor: '#2A2A2A', borderWidth: 0 },
-    outline: { backgroundColor: 'transparent', borderWidth: 2, borderColor: '#FF6B35' },
+    outline: { backgroundColor: 'transparent', borderWidth: 2, borderColor: '#76FF00' },
     danger: { backgroundColor: '#DC3545', borderWidth: 0 },
   };
 
   const variantTextStyles = {
     secondary: { color: '#fff' },
-    outline: { color: '#FF6B35' },
+    outline: { color: '#76FF00' },
     danger: { color: '#fff' },
   };
 
@@ -92,7 +92,7 @@ export const Button: React.FC<ButtonProps> = ({
       activeOpacity={0.8}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'outline' ? '#FF6B35' : '#fff'} />
+        <ActivityIndicator color={variant === 'outline' ? '#76FF00' : '#fff'} />
       ) : (
         <>
           {icon}
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   primaryText: {
-    color: '#fff',
+    color: '#000',
     fontWeight: '700',
   },
   text: {

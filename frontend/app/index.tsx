@@ -15,7 +15,7 @@ import { Asset } from 'expo-asset';
 
 import { useAuthStore } from '../src/store/authStore';
 
-const BRAND_GREEN = '#39FF14';
+const BRAND_GREEN = '#76FF00';
 const VIDEO_MODULE = require('../assets/forge-bg.mp4');
 const { height: SCREEN_H } = Dimensions.get('window');
 
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     width: '100%',
-    backgroundColor: '#39FF14',
+    backgroundColor: '#76FF00',
     borderRadius: 30,
     paddingVertical: 17,
     alignItems: 'center',
@@ -247,11 +247,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#39FF14',
+    borderColor: '#76FF00',
     backgroundColor: 'transparent',
   },
   secondaryButtonText: {
-    color: '#39FF14',
+    color: '#76FF00',
     fontSize: 15,
     fontWeight: '700',
     letterSpacing: 2.5,

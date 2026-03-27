@@ -74,7 +74,7 @@ export default function DashboardScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#FF6B35"
+            tintColor="#76FF00"
           />
         }
         showsVerticalScrollIndicator={false}
@@ -101,7 +101,7 @@ export default function DashboardScreen() {
             title="Workouts"
             value={stats?.total_workouts || 0}
             icon="fitness-outline"
-            color="#FF6B35"
+            color="#76FF00"
           />
           <StatCard
             title="Minutes"
@@ -188,8 +188,8 @@ export default function DashboardScreen() {
               style={styles.actionCard}
               onPress={() => router.push('/(tabs)/workouts')}
             >
-              <View style={[styles.actionIcon, { backgroundColor: 'rgba(255, 107, 53, 0.2)' }]}>
-                <Ionicons name="sparkles" size={24} color="#FF6B35" />
+              <View style={[styles.actionIcon, { backgroundColor: 'rgba(118,255,0,0.12)' }]}>
+                <Ionicons name="sparkles" size={24} color="#76FF00" />
               </View>
               <Text style={styles.actionLabel}>AI Workout</Text>
             </TouchableOpacity>
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   dayBarActive: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
   },
   dayLabel: {
     color: '#666',
@@ -310,13 +310,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   todayBadge: {
-    backgroundColor: 'rgba(255, 107, 53, 0.2)',
+    backgroundColor: 'rgba(118,255,0,0.12)',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
   },
   todayBadgeText: {
-    color: '#FF6B35',
+    color: '#76FF00',
     fontSize: 12,
     fontWeight: '700',
   },

@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/store/authStore';
 import { Button } from '../../src/components/Button';
 import { BodyAnatomy } from '../../src/components/BodyAnatomy';
+import ForgeVideoBackground from '../../src/components/ForgeVideoBackground';
 
 // Muscle groups organized by body region
 const MUSCLE_GROUPS = {
@@ -229,7 +230,10 @@ export default function ScheduleOnboarding() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.root}>
+      <ForgeVideoBackground />
+      <View style={styles.contentLayer}>
+      <SafeAreaView style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -449,7 +453,7 @@ export default function ScheduleOnboarding() {
                         <Ionicons
                           name={muscle.icon as any}
                           size={16}
-                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#39FF14' : '#888'}
+                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#76FF00' : '#888'}
                         />
                         <Text style={[
                           styles.muscleChipText,
@@ -476,7 +480,7 @@ export default function ScheduleOnboarding() {
                         <Ionicons
                           name={muscle.icon as any}
                           size={16}
-                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#39FF14' : '#888'}
+                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#76FF00' : '#888'}
                         />
                         <Text style={[
                           styles.muscleChipText,
@@ -503,7 +507,7 @@ export default function ScheduleOnboarding() {
                         <Ionicons
                           name={muscle.icon as any}
                           size={16}
-                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#39FF14' : '#888'}
+                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#76FF00' : '#888'}
                         />
                         <Text style={[
                           styles.muscleChipText,
@@ -530,7 +534,7 @@ export default function ScheduleOnboarding() {
                         <Ionicons
                           name={muscle.icon as any}
                           size={16}
-                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#39FF14' : '#888'}
+                          color={(dayMuscles[activeDayModal] || []).includes(muscle.id) ? '#76FF00' : '#888'}
                         />
                         <Text style={[
                           styles.muscleChipText,
@@ -554,13 +558,23 @@ export default function ScheduleOnboarding() {
         </View>
       </Modal>
     </SafeAreaView>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  contentLayer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 2,
+    elevation: 2,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
   },
   scrollContent: {
     flexGrow: 1,
@@ -583,14 +597,14 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
     borderRadius: 2,
   },
   header: {
     marginBottom: 24,
   },
   step: {
-    color: '#FF6B35',
+    color: '#76FF00',
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 8,
@@ -627,8 +641,8 @@ const styles = StyleSheet.create({
     borderColor: '#2A2A2A',
   },
   splitChipSelected: {
-    backgroundColor: 'rgba(255, 107, 53, 0.2)',
-    borderColor: '#FF6B35',
+    backgroundColor: 'rgba(118,255,0,0.15)',
+    borderColor: '#76FF00',
   },
   splitChipText: {
     color: '#888',
@@ -636,7 +650,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   splitChipTextSelected: {
-    color: '#FF6B35',
+    color: '#76FF00',
   },
   splitDescription: {
     color: '#666',
@@ -660,8 +674,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   dayNumChipSelected: {
-    backgroundColor: 'rgba(255, 107, 53, 0.2)',
-    borderColor: '#FF6B35',
+    backgroundColor: 'rgba(118,255,0,0.15)',
+    borderColor: '#76FF00',
   },
   dayNumText: {
     color: '#888',
@@ -669,7 +683,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   dayNumTextSelected: {
-    color: '#FF6B35',
+    color: '#76FF00',
   },
   helperText: {
     color: '#666',
@@ -690,8 +704,8 @@ const styles = StyleSheet.create({
     borderColor: '#2A2A2A',
   },
   durationChipSelected: {
-    backgroundColor: 'rgba(255, 107, 53, 0.2)',
-    borderColor: '#FF6B35',
+    backgroundColor: 'rgba(118,255,0,0.15)',
+    borderColor: '#76FF00',
   },
   durationText: {
     color: '#888',
@@ -699,7 +713,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   durationTextSelected: {
-    color: '#FF6B35',
+    color: '#76FF00',
   },
   daysContainer: {
     gap: 12,
@@ -719,7 +733,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   dayCardTitle: {
-    color: '#FF6B35',
+    color: '#76FF00',
     fontSize: 16,
     fontWeight: '700',
   },
@@ -751,7 +765,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 255, 136, 0.3)',
   },
   muscleTagText: {
-    color: '#39FF14',
+    color: '#76FF00',
     fontSize: 12,
     fontWeight: '500',
   },
@@ -810,7 +824,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   muscleGroupTitle: {
-    color: '#FF6B35',
+    color: '#76FF00',
     fontSize: 14,
     fontWeight: '600',
     marginTop: 16,
@@ -834,7 +848,7 @@ const styles = StyleSheet.create({
   },
   muscleChipSelected: {
     backgroundColor: 'rgba(0, 255, 136, 0.15)',
-    borderColor: '#39FF14',
+    borderColor: '#76FF00',
   },
   muscleChipText: {
     color: '#888',
@@ -842,7 +856,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   muscleChipTextSelected: {
-    color: '#39FF14',
+    color: '#76FF00',
   },
   modalDoneButton: {
     marginTop: 24,

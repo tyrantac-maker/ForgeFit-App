@@ -15,23 +15,21 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/store/authStore';
 import { Button } from '../../src/components/Button';
 import { Input } from '../../src/components/Input';
+import ForgeVideoBackground from '../../src/components/ForgeVideoBackground';
+
+const BRAND_GREEN = '#76FF00';
 
 export default function ProfileOnboarding() {
   const router = useRouter();
   const { user, updateProfile } = useAuthStore();
-  
+
   const [age, setAge] = useState(user?.age?.toString() || '');
-  
-  // Height options
   const [heightUnit, setHeightUnit] = useState<'cm' | 'ft_in'>(user?.height_unit || 'cm');
   const [heightCm, setHeightCm] = useState(user?.height?.toString() || '');
   const [heightFeet, setHeightFeet] = useState(user?.height_feet?.toString() || '');
   const [heightInches, setHeightInches] = useState(user?.height_inches?.toString() || '');
-  
-  // Weight options
   const [weightUnit, setWeightUnit] = useState<'kg' | 'lbs' | 'stone'>(user?.weight_unit || 'kg');
   const [weight, setWeight] = useState(user?.weight?.toString() || '');
-  
   const [country, setCountry] = useState(user?.country || '');
   const [location, setLocation] = useState(user?.location || '');
   const [fitnessLevel, setFitnessLevel] = useState(user?.fitness_level || '');
@@ -43,17 +41,13 @@ export default function ProfileOnboarding() {
     { id: 'advanced', label: 'Advanced', description: '3+ years experience' },
   ];
 
-  // Convert height to cm for storage
   const getHeightInCm = () => {
-    if (heightUnit === 'cm') {
-      return parseFloat(heightCm) || 0;
-    }
+    if (heightUnit === 'cm') return parseFloat(heightCm) || 0;
     const feet = parseInt(heightFeet) || 0;
     const inches = parseInt(heightInches) || 0;
     return Math.round((feet * 30.48) + (inches * 2.54));
   };
 
-  // Convert weight to kg for storage
   const getWeightInKg = () => {
     const w = parseFloat(weight) || 0;
     if (weightUnit === 'kg') return w;
@@ -67,10 +61,6 @@ export default function ProfileOnboarding() {
       Alert.alert('Required Fields', 'Please fill in age and fitness level');
       return;
     }
-
-    const heightInCm = getHeightInCm();
-    const weightInKg = getWeightInKg();
-
     if (heightUnit === 'cm' && !heightCm) {
       Alert.alert('Required Fields', 'Please enter your height');
       return;
@@ -83,6 +73,9 @@ export default function ProfileOnboarding() {
       Alert.alert('Required Fields', 'Please enter your weight');
       return;
     }
+
+    const heightInCm = getHeightInCm();
+    const weightInKg = getWeightInKg();
 
     setLoading(true);
     try {
@@ -109,201 +102,168 @@ export default function ProfileOnboarding() {
   };
 
   const handleBack = () => {
-    // If user is editing profile (already completed onboarding), go back
     if (user?.profile_complete) {
       router.back();
     } else {
-      // If in initial onboarding, go to dashboard or home
       router.replace('/(tabs)');
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.headerSection}>
-        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
+    <View style={styles.root}>
+      <ForgeVideoBackground />
 
-        <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: '20%' }]} />
-        </View>
+      <View style={styles.contentLayer}>
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.headerSection}>
+            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
 
-        <View style={styles.header}>
-          <Text style={styles.step}>Step 1 of 5</Text>
-          <Text style={styles.title}>Let's Get to Know You</Text>
-          <Text style={styles.subtitle}>This helps us personalize your workouts</Text>
-        </View>
-      </View>
-
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-
-          <View style={styles.form}>
-            <Input
-              label="Age *"
-              placeholder="Enter your age"
-              value={age}
-              onChangeText={setAge}
-              keyboardType="numeric"
-              icon="calendar-outline"
-            />
-
-            {/* Height Section */}
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Height *</Text>
-              <View style={styles.unitToggle}>
-                <TouchableOpacity
-                  style={[styles.unitButton, heightUnit === 'cm' && styles.unitButtonActive]}
-                  onPress={() => setHeightUnit('cm')}
-                >
-                  <Text style={[styles.unitButtonText, heightUnit === 'cm' && styles.unitButtonTextActive]}>cm</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.unitButton, heightUnit === 'ft_in' && styles.unitButtonActive]}
-                  onPress={() => setHeightUnit('ft_in')}
-                >
-                  <Text style={[styles.unitButtonText, heightUnit === 'ft_in' && styles.unitButtonTextActive]}>ft/in</Text>
-                </TouchableOpacity>
-              </View>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: '20%' }]} />
             </View>
 
-            {heightUnit === 'cm' ? (
-              <Input
-                placeholder="Height in cm"
-                value={heightCm}
-                onChangeText={setHeightCm}
-                keyboardType="numeric"
-                icon="resize-outline"
-              />
-            ) : (
-              <View style={styles.row}>
-                <View style={styles.halfInput}>
-                  <Input
-                    placeholder="Feet"
-                    value={heightFeet}
-                    onChangeText={setHeightFeet}
-                    keyboardType="numeric"
-                    icon="resize-outline"
-                  />
-                </View>
-                <View style={styles.halfInput}>
-                  <Input
-                    placeholder="Inches"
-                    value={heightInches}
-                    onChangeText={setHeightInches}
-                    keyboardType="numeric"
-                  />
-                </View>
-              </View>
-            )}
-
-            {/* Weight Section */}
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Body Weight *</Text>
-              <View style={styles.unitToggle}>
-                <TouchableOpacity
-                  style={[styles.unitButton, weightUnit === 'kg' && styles.unitButtonActive]}
-                  onPress={() => setWeightUnit('kg')}
-                >
-                  <Text style={[styles.unitButtonText, weightUnit === 'kg' && styles.unitButtonTextActive]}>kg</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.unitButton, weightUnit === 'lbs' && styles.unitButtonActive]}
-                  onPress={() => setWeightUnit('lbs')}
-                >
-                  <Text style={[styles.unitButtonText, weightUnit === 'lbs' && styles.unitButtonTextActive]}>lbs</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.unitButton, weightUnit === 'stone' && styles.unitButtonActive]}
-                  onPress={() => setWeightUnit('stone')}
-                >
-                  <Text style={[styles.unitButtonText, weightUnit === 'stone' && styles.unitButtonTextActive]}>st</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <Input
-              placeholder={`Weight in ${weightUnit === 'stone' ? 'stone' : weightUnit}`}
-              value={weight}
-              onChangeText={setWeight}
-              keyboardType="numeric"
-              icon="scale-outline"
-            />
-
-            <View style={styles.row}>
-              <View style={styles.halfInput}>
-                <Input
-                  label="Country"
-                  placeholder="Country"
-                  value={country}
-                  onChangeText={setCountry}
-                  icon="globe-outline"
-                />
-              </View>
-              <View style={styles.halfInput}>
-                <Input
-                  label="City"
-                  placeholder="City"
-                  value={location}
-                  onChangeText={setLocation}
-                  icon="location-outline"
-                />
-              </View>
-            </View>
-
-            <Text style={styles.sectionTitleStandalone}>Fitness Level *</Text>
-            <View style={styles.optionsContainer}>
-              {fitnessLevels.map((level) => (
-                <TouchableOpacity
-                  key={level.id}
-                  style={[
-                    styles.optionCard,
-                    fitnessLevel === level.id && styles.optionCardSelected,
-                  ]}
-                  onPress={() => setFitnessLevel(level.id)}
-                >
-                  <View style={styles.optionContent}>
-                    <Text style={[
-                      styles.optionLabel,
-                      fitnessLevel === level.id && styles.optionLabelSelected,
-                    ]}>
-                      {level.label}
-                    </Text>
-                    <Text style={styles.optionDescription}>{level.description}</Text>
-                  </View>
-                  {fitnessLevel === level.id && (
-                    <Ionicons name="checkmark-circle" size={24} color="#FF6B35" />
-                  )}
-                </TouchableOpacity>
-              ))}
+            <View style={styles.header}>
+              <Text style={styles.step}>Step 1 of 5</Text>
+              <Text style={styles.title}>Let's Get to Know You</Text>
+              <Text style={styles.subtitle}>This helps us personalize your workouts</Text>
             </View>
           </View>
 
-          <Button
-            title="Continue"
-            onPress={handleContinue}
-            loading={loading}
-            size="large"
-            style={styles.continueButton}
-          />
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardView}
+          >
+            <ScrollView
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.form}>
+                <Input
+                  label="Age *"
+                  placeholder="Enter your age"
+                  value={age}
+                  onChangeText={setAge}
+                  keyboardType="numeric"
+                  icon="calendar-outline"
+                />
+
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Height *</Text>
+                  <View style={styles.unitToggle}>
+                    <TouchableOpacity
+                      style={[styles.unitButton, heightUnit === 'cm' && styles.unitButtonActive]}
+                      onPress={() => setHeightUnit('cm')}
+                    >
+                      <Text style={[styles.unitButtonText, heightUnit === 'cm' && styles.unitButtonTextActive]}>cm</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.unitButton, heightUnit === 'ft_in' && styles.unitButtonActive]}
+                      onPress={() => setHeightUnit('ft_in')}
+                    >
+                      <Text style={[styles.unitButtonText, heightUnit === 'ft_in' && styles.unitButtonTextActive]}>ft/in</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                {heightUnit === 'cm' ? (
+                  <Input
+                    placeholder="Height in cm"
+                    value={heightCm}
+                    onChangeText={setHeightCm}
+                    keyboardType="numeric"
+                    icon="resize-outline"
+                  />
+                ) : (
+                  <View style={styles.row}>
+                    <View style={styles.halfInput}>
+                      <Input placeholder="Feet" value={heightFeet} onChangeText={setHeightFeet} keyboardType="numeric" icon="resize-outline" />
+                    </View>
+                    <View style={styles.halfInput}>
+                      <Input placeholder="Inches" value={heightInches} onChangeText={setHeightInches} keyboardType="numeric" />
+                    </View>
+                  </View>
+                )}
+
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Body Weight *</Text>
+                  <View style={styles.unitToggle}>
+                    {(['kg', 'lbs', 'stone'] as const).map((u) => (
+                      <TouchableOpacity
+                        key={u}
+                        style={[styles.unitButton, weightUnit === u && styles.unitButtonActive]}
+                        onPress={() => setWeightUnit(u)}
+                      >
+                        <Text style={[styles.unitButtonText, weightUnit === u && styles.unitButtonTextActive]}>
+                          {u === 'stone' ? 'st' : u}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+
+                <Input
+                  placeholder={`Weight in ${weightUnit === 'stone' ? 'stone' : weightUnit}`}
+                  value={weight}
+                  onChangeText={setWeight}
+                  keyboardType="numeric"
+                  icon="scale-outline"
+                />
+
+                <View style={styles.row}>
+                  <View style={styles.halfInput}>
+                    <Input label="Country" placeholder="Country" value={country} onChangeText={setCountry} icon="globe-outline" />
+                  </View>
+                  <View style={styles.halfInput}>
+                    <Input label="City" placeholder="City" value={location} onChangeText={setLocation} icon="location-outline" />
+                  </View>
+                </View>
+
+                <Text style={styles.sectionTitleStandalone}>Fitness Level *</Text>
+                <View style={styles.optionsContainer}>
+                  {fitnessLevels.map((level) => (
+                    <TouchableOpacity
+                      key={level.id}
+                      style={[styles.optionCard, fitnessLevel === level.id && styles.optionCardSelected]}
+                      onPress={() => setFitnessLevel(level.id)}
+                    >
+                      <View style={styles.optionContent}>
+                        <Text style={[styles.optionLabel, fitnessLevel === level.id && styles.optionLabelSelected]}>
+                          {level.label}
+                        </Text>
+                        <Text style={styles.optionDescription}>{level.description}</Text>
+                      </View>
+                      {fitnessLevel === level.id && (
+                        <Ionicons name="checkmark-circle" size={24} color={BRAND_GREEN} />
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <Button title="Continue" onPress={handleContinue} loading={loading} size="large" style={styles.continueButton} />
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#000',
+  },
+  contentLayer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 2,
+    elevation: 2,
+  },
+  safeArea: {
+    flex: 1,
   },
   headerSection: {
     padding: 24,
@@ -321,27 +281,27 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   progressBar: {
     height: 4,
-    backgroundColor: '#2A2A2A',
+    backgroundColor: 'rgba(255,255,255,0.15)',
     borderRadius: 2,
     marginBottom: 24,
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
     borderRadius: 2,
   },
   header: {
     marginBottom: 16,
   },
   step: {
-    color: '#FF6B35',
+    color: '#76FF00',
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 8,
@@ -380,7 +340,7 @@ const styles = StyleSheet.create({
   },
   unitToggle: {
     flexDirection: 'row',
-    backgroundColor: '#1A1A1A',
+    backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: 8,
     padding: 2,
   },
@@ -390,7 +350,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   unitButtonActive: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
   },
   unitButtonText: {
     color: '#888',
@@ -398,7 +358,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   unitButtonTextActive: {
-    color: '#fff',
+    color: '#000',
   },
   row: {
     flexDirection: 'row',
@@ -412,17 +372,17 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   optionCard: {
-    backgroundColor: '#1A1A1A',
+    backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#2A2A2A',
+    borderColor: 'rgba(255,255,255,0.12)',
   },
   optionCardSelected: {
-    borderColor: '#FF6B35',
-    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+    borderColor: '#76FF00',
+    backgroundColor: 'rgba(118,255,0,0.08)',
   },
   optionContent: {
     flex: 1,
@@ -434,7 +394,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   optionLabelSelected: {
-    color: '#FF6B35',
+    color: '#76FF00',
   },
   optionDescription: {
     color: '#888',

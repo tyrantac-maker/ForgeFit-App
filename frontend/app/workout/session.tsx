@@ -270,7 +270,7 @@ export default function WorkoutSessionScreen() {
           <Ionicons
             name={voiceEnabled ? 'volume-high' : 'volume-mute'}
             size={24}
-            color={voiceEnabled ? '#FF6B35' : '#666'}
+            color={voiceEnabled ? '#76FF00' : '#666'}
           />
         </TouchableOpacity>
       </View>
@@ -326,7 +326,7 @@ export default function WorkoutSessionScreen() {
                 <Text style={styles.animationLabel}>START</Text>
               </View>
               <View style={styles.animationArrow}>
-                <Ionicons name="arrow-forward" size={24} color="#39FF14" />
+                <Ionicons name="arrow-forward" size={24} color="#76FF00" />
               </View>
               <View style={styles.animationBox}>
                 <ExerciseAnimation 
@@ -579,7 +579,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
     borderRadius: 3,
   },
   progressText: {
@@ -625,7 +625,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   exerciseCount: {
-    color: '#FF6B35',
+    color: '#76FF00',
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 8,
@@ -656,7 +656,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   animationLabel: {
-    color: '#39FF14',
+    color: '#76FF00',
     fontSize: 10,
     fontWeight: '700',
     marginTop: 6,
@@ -669,7 +669,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -740,7 +740,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4ECDC4',
   },
   setDotCurrent: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
   },
   setDotText: {
     color: '#fff',

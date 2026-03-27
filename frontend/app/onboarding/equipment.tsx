@@ -17,6 +17,7 @@ import { useWorkoutStore } from '../../src/store/workoutStore';
 import { Button } from '../../src/components/Button';
 import { Input } from '../../src/components/Input';
 import { saveEquipment } from '../../src/utils/api';
+import ForgeVideoBackground from '../../src/components/ForgeVideoBackground';
 
 interface EquipmentItem {
   name: string;
@@ -189,7 +190,10 @@ export default function EquipmentOnboarding() {
   const selectedCount = equipment.filter((item) => item.selected).length;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.root}>
+      <ForgeVideoBackground />
+      <View style={styles.contentLayer}>
+      <SafeAreaView style={styles.container}>
       <View style={styles.headerSection}>
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
@@ -257,7 +261,7 @@ export default function EquipmentOnboarding() {
       >
         {/* Add Custom Equipment Button */}
         <TouchableOpacity style={styles.addCustomButton} onPress={() => setShowCustomModal(true)}>
-          <Ionicons name="add-circle-outline" size={24} color="#FF6B35" />
+          <Ionicons name="add-circle-outline" size={24} color="#76FF00" />
           <Text style={styles.addCustomText}>Add Custom Equipment</Text>
         </TouchableOpacity>
 
@@ -418,13 +422,23 @@ export default function EquipmentOnboarding() {
         </View>
       </Modal>
     </SafeAreaView>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  contentLayer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 2,
+    elevation: 2,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
   },
   headerSection: {
     padding: 24,
@@ -447,14 +461,14 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
     borderRadius: 2,
   },
   header: {
     marginBottom: 16,
   },
   step: {
-    color: '#FF6B35',
+    color: '#76FF00',
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 8,
@@ -491,7 +505,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   unitButtonActive: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
   },
   unitButtonText: {
     color: '#888',
@@ -516,8 +530,8 @@ const styles = StyleSheet.create({
     borderColor: '#2A2A2A',
   },
   categoryChipActive: {
-    backgroundColor: '#FF6B35',
-    borderColor: '#FF6B35',
+    backgroundColor: '#76FF00',
+    borderColor: '#76FF00',
   },
   categoryText: {
     color: '#888',
@@ -540,16 +554,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+    backgroundColor: 'rgba(118,255,0,0.08)',
     borderRadius: 12,
     padding: 16,
     borderWidth: 2,
-    borderColor: '#FF6B35',
+    borderColor: '#76FF00',
     borderStyle: 'dashed',
     marginBottom: 8,
   },
   addCustomText: {
-    color: '#FF6B35',
+    color: '#76FF00',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -561,7 +575,7 @@ const styles = StyleSheet.create({
     borderColor: '#2A2A2A',
   },
   customEquipmentCard: {
-    borderColor: '#FF6B35',
+    borderColor: '#76FF00',
     borderWidth: 1,
   },
   equipmentHeader: {
@@ -579,8 +593,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   checkboxSelected: {
-    backgroundColor: '#FF6B35',
-    borderColor: '#FF6B35',
+    backgroundColor: '#76FF00',
+    borderColor: '#76FF00',
   },
   equipmentInfo: {
     flex: 1,
@@ -596,16 +610,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   equipmentNameSelected: {
-    color: '#FF6B35',
+    color: '#76FF00',
   },
   customBadge: {
-    backgroundColor: 'rgba(255, 107, 53, 0.2)',
+    backgroundColor: 'rgba(118,255,0,0.15)',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
   },
   customBadgeText: {
-    color: '#FF6B35',
+    color: '#76FF00',
     fontSize: 10,
     fontWeight: '600',
   },
@@ -692,7 +706,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   categoryChipActiveModal: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
   },
   categoryTextModal: {
     color: '#888',

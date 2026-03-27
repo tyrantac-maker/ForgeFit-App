@@ -32,7 +32,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
   icon,
-  color = '#FF6B35',
+  color = '#76FF00',
   subtitle,
 }) => {
   return (

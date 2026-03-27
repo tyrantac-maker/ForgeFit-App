@@ -69,14 +69,14 @@ export default function ProgressScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#FF6B35"
+            tintColor="#76FF00"
           />
         }
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.overviewCards}>
           <Card style={styles.overviewCard}>
-            <Ionicons name="fitness-outline" size={32} color="#FF6B35" />
+            <Ionicons name="fitness-outline" size={32} color="#76FF00" />
             <Text style={styles.overviewValue}>{stats?.total_workouts || 0}</Text>
             <Text style={styles.overviewLabel}>Total Workouts</Text>
           </Card>

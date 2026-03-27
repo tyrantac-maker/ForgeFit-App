@@ -69,7 +69,7 @@ export default function WorkoutDetailScreen() {
         <View style={styles.headerRight}>
           {workout.ai_generated && (
             <View style={styles.aiBadge}>
-              <Ionicons name="sparkles" size={14} color="#FF6B35" />
+              <Ionicons name="sparkles" size={14} color="#76FF00" />
               <Text style={styles.aiBadgeText}>AI</Text>
             </View>
           )}
@@ -178,13 +178,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: 'rgba(255, 107, 53, 0.2)',
+    backgroundColor: 'rgba(118,255,0,0.12)',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
   aiBadgeText: {
-    color: '#FF6B35',
+    color: '#76FF00',
     fontSize: 12,
     fontWeight: '600',
   },
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,

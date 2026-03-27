@@ -13,6 +13,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/store/authStore';
 import { Button } from '../../src/components/Button';
 import { Input } from '../../src/components/Input';
+import ForgeVideoBackground from '../../src/components/ForgeVideoBackground';
+
+const BRAND_GREEN = '#76FF00';
 
 const GOALS = [
   { id: 'muscle_gain', label: 'Build Muscle', icon: 'barbell-outline', description: 'Increase muscle mass and size' },
@@ -27,16 +30,14 @@ const GOALS = [
 export default function GoalsOnboarding() {
   const router = useRouter();
   const { user, updateProfile } = useAuthStore();
-  
+
   const [selectedGoals, setSelectedGoals] = useState<string[]>(user?.goals || []);
   const [goalWeight, setGoalWeight] = useState(user?.goal_weight?.toString() || '');
   const [loading, setLoading] = useState(false);
 
   const toggleGoal = (goalId: string) => {
     setSelectedGoals((prev) =>
-      prev.includes(goalId)
-        ? prev.filter((g) => g !== goalId)
-        : [...prev, goalId]
+      prev.includes(goalId) ? prev.filter((g) => g !== goalId) : [...prev, goalId]
     );
   };
 
@@ -45,7 +46,6 @@ export default function GoalsOnboarding() {
       Alert.alert('Select Goals', 'Please select at least one fitness goal');
       return;
     }
-
     setLoading(true);
     try {
       await updateProfile({
@@ -61,94 +61,101 @@ export default function GoalsOnboarding() {
     }
   };
 
-  const handleBack = () => {
-    router.back();
-  };
-
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
+    <View style={styles.root}>
+      <ForgeVideoBackground />
 
-        <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: '40%' }]} />
-        </View>
-
-        <View style={styles.header}>
-          <Text style={styles.step}>Step 2 of 5</Text>
-          <Text style={styles.title}>What Are Your Goals?</Text>
-          <Text style={styles.subtitle}>Select all that apply to you</Text>
-        </View>
-
-        <View style={styles.goalsGrid}>
-          {GOALS.map((goal) => (
-            <TouchableOpacity
-              key={goal.id}
-              style={[
-                styles.goalCard,
-                selectedGoals.includes(goal.id) && styles.goalCardSelected,
-              ]}
-              onPress={() => toggleGoal(goal.id)}
-            >
-              <View style={[
-                styles.goalIconContainer,
-                selectedGoals.includes(goal.id) && styles.goalIconContainerSelected,
-              ]}>
-                <Ionicons
-                  name={goal.icon as any}
-                  size={28}
-                  color={selectedGoals.includes(goal.id) ? '#FF6B35' : '#888'}
-                />
-              </View>
-              <Text style={[
-                styles.goalLabel,
-                selectedGoals.includes(goal.id) && styles.goalLabelSelected,
-              ]}>
-                {goal.label}
-              </Text>
-              <Text style={styles.goalDescription}>{goal.description}</Text>
-              {selectedGoals.includes(goal.id) && (
-                <View style={styles.checkmark}>
-                  <Ionicons name="checkmark" size={16} color="#fff" />
-                </View>
-              )}
+      <View style={styles.contentLayer}>
+        <SafeAreaView style={styles.safeArea}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
-          ))}
-        </View>
 
-        <View style={styles.weightGoalSection}>
-          <Text style={styles.sectionTitle}>Target Weight (Optional)</Text>
-          <Input
-            placeholder="Enter your goal weight in kg"
-            value={goalWeight}
-            onChangeText={setGoalWeight}
-            keyboardType="numeric"
-            icon="trending-up-outline"
-          />
-        </View>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: '40%' }]} />
+            </View>
 
-        <Button
-          title="Continue"
-          onPress={handleContinue}
-          loading={loading}
-          size="large"
-          disabled={selectedGoals.length === 0}
-          style={styles.continueButton}
-        />
-      </ScrollView>
-    </SafeAreaView>
+            <View style={styles.header}>
+              <Text style={styles.step}>Step 2 of 5</Text>
+              <Text style={styles.title}>What Are Your Goals?</Text>
+              <Text style={styles.subtitle}>Select all that apply to you</Text>
+            </View>
+
+            <View style={styles.goalsGrid}>
+              {GOALS.map((goal) => (
+                <TouchableOpacity
+                  key={goal.id}
+                  style={[styles.goalCard, selectedGoals.includes(goal.id) && styles.goalCardSelected]}
+                  onPress={() => toggleGoal(goal.id)}
+                >
+                  <View style={[
+                    styles.goalIconContainer,
+                    selectedGoals.includes(goal.id) && styles.goalIconContainerSelected,
+                  ]}>
+                    <Ionicons
+                      name={goal.icon as any}
+                      size={28}
+                      color={selectedGoals.includes(goal.id) ? BRAND_GREEN : '#888'}
+                    />
+                  </View>
+                  <Text style={[
+                    styles.goalLabel,
+                    selectedGoals.includes(goal.id) && styles.goalLabelSelected,
+                  ]}>
+                    {goal.label}
+                  </Text>
+                  <Text style={styles.goalDescription}>{goal.description}</Text>
+                  {selectedGoals.includes(goal.id) && (
+                    <View style={styles.checkmark}>
+                      <Ionicons name="checkmark" size={16} color="#000" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <View style={styles.weightGoalSection}>
+              <Text style={styles.sectionTitle}>Target Weight (Optional)</Text>
+              <Input
+                placeholder="Enter your goal weight in kg"
+                value={goalWeight}
+                onChangeText={setGoalWeight}
+                keyboardType="numeric"
+                icon="trending-up-outline"
+              />
+            </View>
+
+            <Button
+              title="Continue"
+              onPress={handleContinue}
+              loading={loading}
+              size="large"
+              disabled={selectedGoals.length === 0}
+              style={styles.continueButton}
+            />
+          </ScrollView>
+        </SafeAreaView>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#000',
+  },
+  contentLayer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 2,
+    elevation: 2,
+  },
+  safeArea: {
+    flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
@@ -158,27 +165,27 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   progressBar: {
     height: 4,
-    backgroundColor: '#2A2A2A',
+    backgroundColor: 'rgba(255,255,255,0.15)',
     borderRadius: 2,
     marginBottom: 24,
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
     borderRadius: 2,
   },
   header: {
     marginBottom: 24,
   },
   step: {
-    color: '#FF6B35',
+    color: '#76FF00',
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 8,
@@ -201,28 +208,28 @@ const styles = StyleSheet.create({
   },
   goalCard: {
     width: '47%',
-    backgroundColor: '#1A1A1A',
+    backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 16,
     padding: 16,
     borderWidth: 2,
-    borderColor: '#2A2A2A',
+    borderColor: 'rgba(255,255,255,0.12)',
     position: 'relative',
   },
   goalCardSelected: {
-    borderColor: '#FF6B35',
-    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+    borderColor: '#76FF00',
+    backgroundColor: 'rgba(118,255,0,0.08)',
   },
   goalIconContainer: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: '#2A2A2A',
+    backgroundColor: 'rgba(255,255,255,0.08)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
   },
   goalIconContainerSelected: {
-    backgroundColor: 'rgba(255, 107, 53, 0.2)',
+    backgroundColor: 'rgba(118,255,0,0.15)',
   },
   goalLabel: {
     color: '#fff',
@@ -231,7 +238,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   goalLabelSelected: {
-    color: '#FF6B35',
+    color: '#76FF00',
   },
   goalDescription: {
     color: '#666',
@@ -244,7 +251,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#76FF00',
     alignItems: 'center',
     justifyContent: 'center',
   },

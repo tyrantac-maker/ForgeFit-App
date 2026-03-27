@@ -32,7 +32,7 @@ export default function RootLayout() {
   if (!fontsLoaded && !fontError) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#39FF14" />
+        <ActivityIndicator size="large" color="#76FF00" />
         <StatusBar style="light" />
       </View>
     );
@@ -41,7 +41,7 @@ export default function RootLayout() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#39FF14" />
+        <ActivityIndicator size="large" color="#76FF00" />
         <StatusBar style="light" />
       </View>
     );

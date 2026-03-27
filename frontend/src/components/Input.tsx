@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   focused: {
-    borderColor: '#FF6B35',
+    borderColor: '#76FF00',
   },
   errorBorder: {
     borderColor: '#DC3545',
