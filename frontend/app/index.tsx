@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,7 +21,6 @@ const VIDEO_MODULE = require('../assets/forge-bg.mp4');
 export default function Index() {
   const router = useRouter();
   const { isAuthenticated, user, isLoading } = useAuthStore();
-  const [videoReady, setVideoReady] = useState(false);
 
   const player = useVideoPlayer(null, (p) => {
     p.loop = true;
@@ -31,7 +37,6 @@ export default function Index() {
         if (mounted && uri) {
           player.replace({ uri });
           player.play();
-          setVideoReady(true);
         }
       } catch (e) {
         console.warn('Video load failed:', e);
@@ -64,31 +69,33 @@ export default function Index() {
   }, [isAuthenticated, user, isLoading, router]);
 
   return (
-    <View style={styles.container}>
-      {/* Background video — shown once asset is loaded */}
-      <VideoView
-        player={player}
-        style={StyleSheet.absoluteFillObject}
-        contentFit="cover"
-        nativeControls={false}
-        allowsFullscreen={false}
-        allowsPictureInPicture={false}
-      />
+    <View style={styles.root}>
 
-      {/* Dark overlay */}
-      <View style={styles.overlay} />
+      {/* ── Layer 0: Video background ── */}
+      <View style={styles.videoLayer} pointerEvents="none">
+        <VideoView
+          player={player}
+          style={StyleSheet.absoluteFillObject}
+          contentFit="cover"
+          nativeControls={false}
+          allowsFullscreen={false}
+          allowsPictureInPicture={false}
+        />
+      </View>
 
-      {/* Bottom gradient fade */}
-      <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,0.88)', '#000']}
-        locations={[0, 0.4, 0.75, 1]}
-        style={styles.bottomFade}
-      />
+      {/* ── Layer 1: Dark overlay + gradient, rendered above video ── */}
+      <View style={styles.overlayLayer} pointerEvents="none">
+        <View style={StyleSheet.absoluteFillObject} />
+        <LinearGradient
+          colors={['rgba(0,0,0,0.35)', 'rgba(0,0,0,0.6)', 'rgba(0,0,0,0.92)', '#000']}
+          locations={[0, 0.45, 0.78, 1]}
+          style={StyleSheet.absoluteFillObject}
+        />
+      </View>
 
-      {/* Main UI */}
-      <View style={styles.content}>
-
-        {/* Logo image — FORGEFIT text is inside the image */}
+      {/* ── Layer 2: UI content, highest z-order ── */}
+      <View style={styles.contentLayer}>
+        {/* Logo — FORGEFIT text is inside the image */}
         <View style={styles.logoContainer}>
           <Image
             source={require('../assets/images/logo.png')}
@@ -131,61 +138,72 @@ export default function Index() {
             <Text style={styles.secondaryButtonText}>LOG IN</Text>
           </TouchableOpacity>
         </View>
-
       </View>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
     backgroundColor: '#000',
   },
-  overlay: {
+
+  /* Video sits at z=0 with zero elevation so UI renders above it on Android */
+  videoLayer: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.42)',
+    zIndex: 0,
+    elevation: 0,
   },
-  bottomFade: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 300,
+
+  /* Dark tint + bottom gradient — must be above video */
+  overlayLayer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    zIndex: 1,
+    elevation: 1,
   },
-  content: {
-    flex: 1,
+
+  /* All interactive UI — highest z-order */
+  contentLayer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 2,
+    elevation: 2,
     paddingHorizontal: 22,
     justifyContent: 'center',
-    paddingBottom: 20,
+    paddingBottom: 24,
   },
+
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 36,
+    marginBottom: 32,
   },
   logo: {
-    width: '88%',
+    width: '82%',
     aspectRatio: 1,
   },
+
   featuresContainer: {
-    gap: 12,
-    marginBottom: 36,
+    gap: 11,
+    marginBottom: 32,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    padding: 15,
+    padding: 14,
     borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(0,0,0,0.45)',
     borderWidth: 1,
-    borderColor: 'rgba(118,255,0,0.18)',
+    borderColor: 'rgba(118,255,0,0.22)',
   },
   featureText: {
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '500',
   },
+
   buttonContainer: {
     gap: 12,
   },
