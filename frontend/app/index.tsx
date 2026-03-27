@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Image,
   TouchableOpacity,
-  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { VideoView, useVideoPlayer } from 'expo-video';
@@ -83,44 +82,47 @@ export default function Index() {
         />
       </View>
 
-      {/* ── Layer 1: Dark overlay + gradient, rendered above video ── */}
+      {/* ── Layer 1: Dark overlay + gradient ── */}
       <View style={styles.overlayLayer} pointerEvents="none">
-        <View style={StyleSheet.absoluteFillObject} />
         <LinearGradient
-          colors={['rgba(0,0,0,0.35)', 'rgba(0,0,0,0.6)', 'rgba(0,0,0,0.92)', '#000']}
-          locations={[0, 0.45, 0.78, 1]}
+          colors={['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.9)', '#000']}
+          locations={[0, 0.4, 0.72, 1]}
           style={StyleSheet.absoluteFillObject}
         />
       </View>
 
-      {/* ── Layer 2: UI content, highest z-order ── */}
+      {/* ── Layer 2: All UI, anchored to the bottom ── */}
       <View style={styles.contentLayer}>
-        {/* Logo — FORGEFIT text is inside the image */}
-        <View style={styles.logoContainer}>
-          <Image
-            source={require('../assets/images/logo.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </View>
+
+        {/* Logo image — fixed height so it never overflows */}
+        <Image
+          source={require('../assets/images/logo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+
+        {/* Subtitle sits directly under the FORGEFIT text in the image */}
+        <Text style={styles.subtitle}>
+          Build Your Strength. Forge Your Body.
+        </Text>
 
         {/* Feature highlights */}
         <View style={styles.featuresContainer}>
           <View style={styles.featureItem}>
-            <Ionicons name="sparkles" size={20} color={BRAND_GREEN} />
+            <Ionicons name="sparkles" size={18} color={BRAND_GREEN} />
             <Text style={styles.featureText}>AI Generated Workouts</Text>
           </View>
           <View style={styles.featureItem}>
-            <Ionicons name="analytics" size={20} color={BRAND_GREEN} />
+            <Ionicons name="analytics" size={18} color={BRAND_GREEN} />
             <Text style={styles.featureText}>Track Strength Progression</Text>
           </View>
           <View style={styles.featureItem}>
-            <Ionicons name="barbell" size={20} color={BRAND_GREEN} />
+            <Ionicons name="barbell" size={18} color={BRAND_GREEN} />
             <Text style={styles.featureText}>Train With Your Equipment</Text>
           </View>
         </View>
 
-        {/* Buttons */}
+        {/* CTA buttons */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.primaryButton}
@@ -138,8 +140,8 @@ export default function Index() {
             <Text style={styles.secondaryButtonText}>LOG IN</Text>
           </TouchableOpacity>
         </View>
-      </View>
 
+      </View>
     </View>
   );
 }
@@ -150,68 +152,77 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
 
-  /* Video sits at z=0 with zero elevation so UI renders above it on Android */
   videoLayer: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 0,
     elevation: 0,
   },
 
-  /* Dark tint + bottom gradient — must be above video */
   overlayLayer: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.45)',
     zIndex: 1,
     elevation: 1,
   },
 
-  /* All interactive UI — highest z-order */
+  /* Content anchored to the bottom — video shows above it */
   contentLayer: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 2,
     elevation: 2,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
     paddingHorizontal: 22,
-    justifyContent: 'center',
-    paddingBottom: 24,
+    paddingBottom: 36,
   },
 
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
+  /* Logo: fixed height of 200 keeps it visible without overflowing */
   logo: {
-    width: '58%',
-    aspectRatio: 0.74,
+    width: '70%',
+    height: 200,
+    marginBottom: 0,
+  },
+
+  subtitle: {
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: 14,
+    fontWeight: '400',
+    letterSpacing: 0.4,
+    textAlign: 'center',
+    marginBottom: 22,
+    marginTop: 2,
   },
 
   featuresContainer: {
-    gap: 11,
-    marginBottom: 32,
+    width: '100%',
+    gap: 10,
+    marginBottom: 22,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
-    padding: 14,
-    borderRadius: 14,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.50)',
     borderWidth: 1,
     borderColor: 'rgba(118,255,0,0.22)',
   },
   featureText: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '500',
   },
 
   buttonContainer: {
-    gap: 12,
+    width: '100%',
+    gap: 11,
   },
   primaryButton: {
     width: '100%',
     backgroundColor: '#76FF00',
     borderRadius: 14,
-    paddingVertical: 18,
+    paddingVertical: 17,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -224,7 +235,7 @@ const styles = StyleSheet.create({
   secondaryButton: {
     width: '100%',
     borderRadius: 14,
-    paddingVertical: 17,
+    paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
