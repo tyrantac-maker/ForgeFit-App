@@ -11,6 +11,7 @@ externalPort = 3000
 [[ports]]
 localPort = 8000
 externalPort = 8000
+exposeLocalhost = true
 
 [[ports]]
 localPort = 8081
@@ -54,10 +55,10 @@ args = "mkdir -p /home/runner/data/mongodb && mongod --dbpath /home/runner/data/
 name = "Start Frontend"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd frontend && RCT_METRO_PORT=5000 npx expo start --web --localhost"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && RCT_METRO_PORT=5000 npx expo start --tunnel"
+waitForPort = 5000

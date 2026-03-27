@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Video, ResizeMode } from 'expo-av';
+import { VideoView, useVideoPlayer } from 'expo-video';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -10,6 +10,12 @@ import { useAuthStore } from '../src/store/authStore';
 export default function Index() {
   const router = useRouter();
   const { isAuthenticated, user, isLoading } = useAuthStore();
+
+  const player = useVideoPlayer(require('../assets/forge-bg.mp4'), (p) => {
+    p.loop = true;
+    p.muted = true;
+    p.play();
+  });
 
   useEffect(() => {
     if (!isLoading && isAuthenticated && user) {
@@ -37,13 +43,11 @@ export default function Index() {
   return (
     <View style={styles.container}>
       {/* Background video */}
-      <Video
-        source={require('../assets/forge-bg.mp4')}
+      <VideoView
+        player={player}
         style={StyleSheet.absoluteFillObject}
-        resizeMode={ResizeMode.COVER}
-        shouldPlay
-        isLooping
-        isMuted
+        contentFit="cover"
+        nativeControls={false}
       />
 
       {/* Main dark overlay */}
