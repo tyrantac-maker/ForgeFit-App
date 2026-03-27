@@ -1,23 +1,45 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { Asset } from 'expo-asset';
 
 import { useAuthStore } from '../src/store/authStore';
 
 const BRAND_GREEN = '#76FF00';
+const VIDEO_MODULE = require('../assets/forge-bg.mp4');
 
 export default function Index() {
   const router = useRouter();
   const { isAuthenticated, user, isLoading } = useAuthStore();
+  const [videoReady, setVideoReady] = useState(false);
 
-  const player = useVideoPlayer(require('../assets/forge-bg.mp4'), (p) => {
+  const player = useVideoPlayer(null, (p) => {
     p.loop = true;
     p.muted = true;
-    p.play();
   });
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadVideo() {
+      try {
+        const asset = Asset.fromModule(VIDEO_MODULE);
+        await asset.downloadAsync();
+        const uri = asset.localUri ?? asset.uri;
+        if (mounted && uri) {
+          player.replace({ uri });
+          player.play();
+          setVideoReady(true);
+        }
+      } catch (e) {
+        console.warn('Video load failed:', e);
+      }
+    }
+    loadVideo();
+    return () => { mounted = false; };
+  }, []);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated && user) {
@@ -43,12 +65,14 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      {/* Background video */}
+      {/* Background video — shown once asset is loaded */}
       <VideoView
         player={player}
         style={StyleSheet.absoluteFillObject}
         contentFit="cover"
         nativeControls={false}
+        allowsFullscreen={false}
+        allowsPictureInPicture={false}
       />
 
       {/* Dark overlay */}
@@ -64,7 +88,7 @@ export default function Index() {
       {/* Main UI */}
       <View style={styles.content}>
 
-        {/* Logo — contains the FORGEFIT text, acts as the title */}
+        {/* Logo image — FORGEFIT text is inside the image */}
         <View style={styles.logoContainer}>
           <Image
             source={require('../assets/images/logo.png')}
