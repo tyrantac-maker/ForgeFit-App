@@ -6,8 +6,11 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "forgefit",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": false,
+    "assetBundlePatterns": [
+      "assets/**"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -28,13 +31,14 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/splash-image.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#000"
         }
       ],
-      "expo-video"
+      "expo-video",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true
