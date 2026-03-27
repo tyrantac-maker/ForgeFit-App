@@ -1,31 +1,18 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuthStore } from '../src/store/authStore';
-import { Button } from '../src/components/Button';
+import { Video, ResizeMode } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated';
+
+import { useAuthStore } from '../src/store/authStore';
+import { Button } from '../src/components/Button';
 
 export default function Index() {
   const router = useRouter();
   const { isAuthenticated, user, isLoading } = useAuthStore();
 
-  // 🌊 Background movement
-  const move = useSharedValue(0);
-
-  // ✨ Glow pulse
-  const glow = useSharedValue(0);
-
   useEffect(() => {
-    move.value = withRepeat(withTiming(1, { duration: 8000 }), -1, true);
-    glow.value = withRepeat(withTiming(1, { duration: 2000 }), -1, true);
-
     if (!isLoading && isAuthenticated && user) {
       if (user.profile_complete) {
         router.replace('/(tabs)');
@@ -38,6 +25,7 @@ export default function Index() {
           'onboarding/equipment',
           'onboarding/schedule',
         ];
+
         if (step < routes.length) {
           router.replace(`/${routes[step]}` as any);
         } else {
@@ -45,42 +33,38 @@ export default function Index() {
         }
       }
     }
-  }, [isAuthenticated, user, isLoading]);
-
-  const animatedMesh = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { translateX: move.value * 40 },
-        { translateY: move.value * 20 },
-      ],
-    };
-  });
-
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: 0.1 + glow.value * 0.4,
-  }));
+  }, [isAuthenticated, user, isLoading, router]);
 
   return (
-    <LinearGradient
-      colors={['#000000', '#050505', '#000000']}
-      style={styles.container}
-    >
-      {/* 🌊 Moving Mesh Background */}
-      <Animated.View style={[styles.meshBackground, animatedMesh]} />
+    <View style={styles.container}>
+      {/* Background video */}
+      <Video
+        source={require('../assets/forge-bg.mp4')}
+        style={StyleSheet.absoluteFillObject}
+        resizeMode={ResizeMode.COVER}
+        shouldPlay
+        isLooping
+        isMuted
+      />
 
-      {/* ✨ Glow Overlay */}
-      <Animated.View style={[styles.glowOverlay, glowStyle]} />
+      {/* Main dark overlay */}
+      <View style={styles.overlay} />
 
+      {/* Bottom black gradient fade for button readability */}
+      <LinearGradient
+        colors={['transparent', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.92)', '#000000']}
+        locations={[0, 0.45, 0.8, 1]}
+        style={styles.bottomFade}
+      />
+
+      {/* Main UI */}
       <View style={styles.content}>
-
-        {/* 🔥 LOGO */}
         <View style={styles.logoContainer}>
-          <View style={styles.iconWrapper}>
-            <Image
-              source={require('../assets/images/logo.png')}
-              style={styles.logo}
-            />
-          </View>
+          <Image
+            source={require('../assets/images/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
 
           <Text style={styles.title}>
             FORGE<Text style={styles.green}>FIT</Text>
@@ -91,7 +75,6 @@ export default function Index() {
           </Text>
         </View>
 
-        {/* 💪 FEATURES */}
         <View style={styles.featuresContainer}>
           <View style={styles.featureItem}>
             <Ionicons name="sparkles" size={22} color="#00FF88" />
@@ -109,7 +92,6 @@ export default function Index() {
           </View>
         </View>
 
-        {/* 🚀 BUTTONS */}
         <View style={styles.buttonContainer}>
           <Button
             title="START FORGING"
@@ -126,29 +108,28 @@ export default function Index() {
             style={styles.secondaryButton}
           />
         </View>
-
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000',
   },
 
-  meshBackground: {
-    position: 'absolute',
-    width: '200%',
-    height: '200%',
-    backgroundColor: 'rgba(0,255,136,0.05)',
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.48)',
   },
 
-  glowOverlay: {
+  bottomFade: {
     position: 'absolute',
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#00FF88',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 260,
   },
 
   content: {
@@ -159,34 +140,19 @@ const styles = StyleSheet.create({
 
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 50,
-  },
-
-  iconWrapper: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: 'rgba(0,255,136,0.08)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-    borderWidth: 1.5,
-    borderColor: 'rgba(0,255,136,0.4)',
-    shadowColor: '#00FF88',
-    shadowOpacity: 0.7,
-    shadowRadius: 25,
+    marginBottom: 42,
   },
 
   logo: {
-    width: 110,
-    height: 110,
-    resizeMode: 'contain',
+    width: 180,
+    height: 180,
+    marginBottom: 18,
   },
 
   title: {
-    fontSize: 44,
+    fontSize: 42,
     fontWeight: '900',
-    color: '#ffffff',
+    color: '#FFFFFF',
     letterSpacing: 2,
   },
 
@@ -195,31 +161,31 @@ const styles = StyleSheet.create({
   },
 
   subtitle: {
-    fontSize: 14,
-    color: '#aaa',
-    textAlign: 'center',
     marginTop: 8,
-    letterSpacing: 1,
+    fontSize: 14,
+    color: '#B5B5B5',
+    textAlign: 'center',
+    letterSpacing: 0.6,
   },
 
   featuresContainer: {
-    marginBottom: 50,
     gap: 14,
+    marginBottom: 42,
   },
 
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    backgroundColor: 'rgba(255,255,255,0.04)',
     padding: 16,
-    borderRadius: 14,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.06)',
     borderWidth: 1,
-    borderColor: 'rgba(0,255,136,0.15)',
+    borderColor: 'rgba(0,255,136,0.16)',
   },
 
   featureText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '500',
   },
@@ -236,8 +202,8 @@ const styles = StyleSheet.create({
 
   secondaryButton: {
     width: '100%',
-    borderColor: '#00FF88',
-    borderWidth: 1.5,
     borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#00FF88',
   },
 });
