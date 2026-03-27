@@ -130,9 +130,9 @@ export const BodyAnatomy: React.FC<BodyAnatomyProps> = ({
         <Defs>
           {/* Green mesh gradient for highlighted muscles */}
           <LinearGradient id="greenMesh" x1="0%" y1="0%" x2="100%" y2="100%">
-            <Stop offset="0%" stopColor="#76FF00" stopOpacity="0.9" />
+            <Stop offset="0%" stopColor="#39FF14" stopOpacity="0.9" />
             <Stop offset="50%" stopColor="#00CC66" stopOpacity="0.8" />
-            <Stop offset="100%" stopColor="#76FF00" stopOpacity="0.9" />
+            <Stop offset="100%" stopColor="#39FF14" stopOpacity="0.9" />
           </LinearGradient>
           
           {/* Default muscle gradient */}
@@ -176,7 +176,7 @@ export const BodyAnatomy: React.FC<BodyAnatomyProps> = ({
             <Path
               d={muscle.path}
               fill={isSelected(key) ? 'url(#greenMesh)' : 'url(#defaultMuscle)'}
-              stroke={isSelected(key) ? '#76FF00' : '#444'}
+              stroke={isSelected(key) ? '#39FF14' : '#444'}
               strokeWidth={isSelected(key) ? 1.5 : 0.5}
               opacity={isSelected(key) ? 1 : 0.5}
             />
@@ -188,7 +188,7 @@ export const BodyAnatomy: React.FC<BodyAnatomyProps> = ({
                     key={`mesh-${key}-${i}`}
                     d={muscle.path}
                     fill="none"
-                    stroke="#76FF00"
+                    stroke="#39FF14"
                     strokeWidth="0.3"
                     strokeDasharray="2,2"
                     transform={`scale(${0.85 + i * 0.03})`}

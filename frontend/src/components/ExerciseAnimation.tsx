@@ -111,9 +111,9 @@ const EXERCISE_POSES: { [key: string]: { start: any; end: any } } = {
 };
 
 const MeshFigure: React.FC<{ pose: string; position: 'start' | 'end'; size: number }> = ({ pose, position, size }) => {
-  const strokeColor = '#76FF00';
+  const strokeColor = '#39FF14';
   const strokeWidth = 2;
-  const dotColor = '#76FF00';
+  const dotColor = '#39FF14';
   const scale = size / 100;
   
   // Get pose data

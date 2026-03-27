@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { VideoView, useVideoPlayer } from 'expo-video';
@@ -14,8 +15,9 @@ import { Asset } from 'expo-asset';
 
 import { useAuthStore } from '../src/store/authStore';
 
-const BRAND_GREEN = '#76FF00';
+const BRAND_GREEN = '#39FF14';
 const VIDEO_MODULE = require('../assets/forge-bg.mp4');
+const { height: SCREEN_H } = Dimensions.get('window');
 
 export default function Index() {
   const router = useRouter();
@@ -85,60 +87,64 @@ export default function Index() {
       {/* ── Layer 1: Dark overlay + gradient ── */}
       <View style={styles.overlayLayer} pointerEvents="none">
         <LinearGradient
-          colors={['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.9)', '#000']}
-          locations={[0, 0.4, 0.72, 1]}
+          colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,0.88)', '#000']}
+          locations={[0, 0.38, 0.7, 1]}
           style={StyleSheet.absoluteFillObject}
         />
       </View>
 
-      {/* ── Layer 2: All UI, anchored to the bottom ── */}
+      {/* ── Layer 2: Full-screen UI ── */}
       <View style={styles.contentLayer}>
 
-        {/* Logo image — fixed height so it never overflows */}
-        <Image
-          source={require('../assets/images/logo.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-
-        {/* Subtitle sits directly under the FORGEFIT text in the image */}
-        <Text style={styles.subtitle}>
-          Build Your Strength. Forge Your Body.
-        </Text>
-
-        {/* Feature highlights */}
-        <View style={styles.featuresContainer}>
-          <View style={styles.featureItem}>
-            <Ionicons name="sparkles" size={18} color={BRAND_GREEN} />
-            <Text style={styles.featureText}>AI Generated Workouts</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Ionicons name="analytics" size={18} color={BRAND_GREEN} />
-            <Text style={styles.featureText}>Track Strength Progression</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Ionicons name="barbell" size={18} color={BRAND_GREEN} />
-            <Text style={styles.featureText}>Train With Your Equipment</Text>
-          </View>
+        {/* Top section — logo fills upper portion */}
+        <View style={styles.logoSection}>
+          <Image
+            source={require('../assets/images/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </View>
 
-        {/* CTA buttons */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={() => router.push('/auth/register')}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.primaryButtonText}>START FORGING</Text>
-          </TouchableOpacity>
+        {/* Bottom section — subtitle + features + buttons */}
+        <View style={styles.bottomSection}>
+          <Text style={styles.subtitle}>
+            Build Your Strength. Forge Your Body.
+          </Text>
 
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={() => router.push('/auth/login')}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.secondaryButtonText}>LOG IN</Text>
-          </TouchableOpacity>
+          {/* Feature rows — plain, no card background */}
+          <View style={styles.featuresContainer}>
+            <View style={styles.featureItem}>
+              <Ionicons name="sparkles" size={20} color={BRAND_GREEN} />
+              <Text style={styles.featureText}>AI Generated Workouts</Text>
+            </View>
+            <View style={styles.featureItem}>
+              <Ionicons name="analytics" size={20} color={BRAND_GREEN} />
+              <Text style={styles.featureText}>Track Strength Progression</Text>
+            </View>
+            <View style={styles.featureItem}>
+              <Ionicons name="barbell" size={20} color={BRAND_GREEN} />
+              <Text style={styles.featureText}>Train With Your Equipment</Text>
+            </View>
+          </View>
+
+          {/* CTA buttons */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={() => router.push('/auth/register')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.primaryButtonText}>START FORGING</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={() => router.push('/auth/login')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.secondaryButtonText}>LOG IN</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
       </View>
@@ -164,88 +170,90 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
 
-  /* Content anchored to the bottom — video shows above it */
   contentLayer: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 2,
     elevation: 2,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingHorizontal: 22,
-    paddingBottom: 36,
+    flexDirection: 'column',
   },
 
-  /* Logo: fixed height of 200 keeps it visible without overflowing */
+  /* Logo fills ~55% of the screen height */
+  logoSection: {
+    height: SCREEN_H * 0.55,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   logo: {
-    width: '70%',
-    height: 200,
-    marginBottom: 0,
+    width: '85%',
+    height: '100%',
+  },
+
+  /* Everything below the logo */
+  bottomSection: {
+    flex: 1,
+    paddingHorizontal: 22,
+    paddingBottom: 32,
+    justifyContent: 'flex-end',
   },
 
   subtitle: {
-    color: 'rgba(255,255,255,0.75)',
-    fontSize: 14,
+    color: 'rgba(255,255,255,0.65)',
+    fontSize: 13,
     fontWeight: '400',
-    letterSpacing: 0.4,
+    letterSpacing: 0.3,
     textAlign: 'center',
-    marginBottom: 22,
-    marginTop: 2,
+    marginBottom: 20,
   },
 
   featuresContainer: {
     width: '100%',
-    gap: 10,
-    marginBottom: 22,
+    gap: 14,
+    marginBottom: 24,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    backgroundColor: 'rgba(0,0,0,0.50)',
-    borderWidth: 1,
-    borderColor: 'rgba(118,255,0,0.22)',
+    gap: 14,
+    paddingVertical: 4,
   },
   featureText: {
     color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 15,
+    fontWeight: '400',
   },
 
   buttonContainer: {
     width: '100%',
-    gap: 11,
+    gap: 12,
   },
   primaryButton: {
     width: '100%',
-    backgroundColor: '#76FF00',
-    borderRadius: 14,
+    backgroundColor: '#39FF14',
+    borderRadius: 30,
     paddingVertical: 17,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primaryButtonText: {
     color: '#000',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
-    letterSpacing: 2,
+    letterSpacing: 2.5,
   },
   secondaryButton: {
     width: '100%',
-    borderRadius: 14,
+    borderRadius: 30,
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: '#76FF00',
+    borderWidth: 2,
+    borderColor: '#39FF14',
     backgroundColor: 'transparent',
   },
   secondaryButtonText: {
-    color: '#76FF00',
-    fontSize: 16,
-    fontWeight: '600',
-    letterSpacing: 1.5,
+    color: '#39FF14',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 2.5,
   },
 });
