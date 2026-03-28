@@ -15,6 +15,18 @@ import { Card } from '../../src/components/Card';
 import { Button } from '../../src/components/Button';
 import { LANGUAGES, COUNTRIES } from '../../src/data/countries';
 
+function calcCurrentAge(dob: string | undefined, storedAge: number | undefined): number | undefined {
+  if (!dob) return storedAge;
+  const parts = dob.split('/');
+  if (parts.length !== 3) return storedAge;
+  const [day, month, year] = [parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2])];
+  if (isNaN(day) || isNaN(month) || isNaN(year)) return storedAge;
+  const today = new Date();
+  let age = today.getFullYear() - year;
+  if (today.getMonth() + 1 < month || (today.getMonth() + 1 === month && today.getDate() < day)) age--;
+  return age > 0 ? age : storedAge;
+}
+
 function formatHeight(user: any): string {
   if (!user?.height) return '-';
   if (user.height_unit === 'ft_in') {
@@ -90,7 +102,17 @@ export default function ProfileScreen() {
 
         <Card style={styles.card}>
           <Text style={styles.cardTitle}>Personal Info</Text>
-          <ProfileItem icon="calendar-outline" label="Age" value={user?.age ? `${user.age} years` : '-'} />
+          {(user as any)?.dob && (
+            <ProfileItem icon="gift-outline" label="Date of Birth" value={(user as any).dob} />
+          )}
+          <ProfileItem
+            icon="calendar-outline"
+            label="Age"
+            value={(() => {
+              const age = calcCurrentAge((user as any)?.dob, user?.age);
+              return age ? `${age} years old` : '-';
+            })()}
+          />
           <ProfileItem icon="resize-outline" label="Height" value={formatHeight(user)} />
           <ProfileItem icon="scale-outline" label="Weight" value={formatWeight(user?.weight, user?.weight_unit, 'weight')} />
           <ProfileItem

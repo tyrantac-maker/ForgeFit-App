@@ -83,6 +83,7 @@ class UserProfile(BaseModel):
 
 class ProfileUpdate(BaseModel):
     age: Optional[int] = None
+    dob: Optional[str] = None
     height: Optional[float] = None
     height_feet: Optional[int] = None
     height_inches: Optional[int] = None
@@ -426,6 +427,11 @@ async def exchange_session(request: Request, response: Response):
 @api_router.get("/auth/me")
 async def get_me(user: dict = Depends(get_current_user)):
     return {k: v for k, v in user.items() if k != "password"}
+
+@api_router.post("/auth/refresh")
+async def refresh_token(user: dict = Depends(get_current_user)):
+    new_token = create_jwt_token(user["user_id"], user["email"])
+    return {"token": new_token, "user": {k: v for k, v in user.items() if k != "password"}}
 
 @api_router.post("/auth/logout")
 async def logout(request: Request, response: Response):

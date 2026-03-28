@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Platform,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,6 +19,7 @@ import { Input } from '../../src/components/Input';
 import { SelectPicker } from '../../src/components/SelectPicker';
 import { COUNTRIES, LANGUAGES } from '../../src/data/countries';
 import ForgeVideoBackground from '../../src/components/ForgeVideoBackground';
+import * as Location from 'expo-location';
 
 const BRAND_GREEN = '#76FF00';
 
@@ -29,11 +31,37 @@ const languageItems = LANGUAGES.map((l) => ({
   icon: l.flag,
 }));
 
+function calcAge(dobStr: string): number | null {
+  if (!dobStr) return null;
+  const parts = dobStr.split('/');
+  if (parts.length !== 3) return null;
+  let day: number, month: number, year: number;
+  [day, month, year] = [parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2])];
+  if (isNaN(day) || isNaN(month) || isNaN(year) || year < 1900) return null;
+  const today = new Date();
+  let age = today.getFullYear() - year;
+  if (today.getMonth() + 1 < month || (today.getMonth() + 1 === month && today.getDate() < day)) {
+    age--;
+  }
+  return age > 0 && age < 120 ? age : null;
+}
+
+function formatDob(day: string, month: string, year: string): string {
+  if (!day || !month || !year) return '';
+  return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+}
+
 export default function ProfileOnboarding() {
   const router = useRouter();
   const { user, updateProfile } = useAuthStore();
 
-  const [age, setAge] = useState(user?.age?.toString() || '');
+  const [dobDay, setDobDay] = useState('');
+  const [dobMonth, setDobMonth] = useState('');
+  const [dobYear, setDobYear] = useState('');
+
+  const dobStr = formatDob(dobDay, dobMonth, dobYear);
+  const computedAge = calcAge(dobStr);
+
   const [heightUnit, setHeightUnit] = useState<'cm' | 'ft_in'>(user?.height_unit || 'cm');
   const [heightCm, setHeightCm] = useState(user?.height?.toString() || '');
   const [heightFeet, setHeightFeet] = useState(user?.height_feet?.toString() || '');
@@ -55,6 +83,7 @@ export default function ProfileOnboarding() {
   const [preferredLanguage, setPreferredLanguage] = useState(user?.preferred_language || 'en');
   const [fitnessLevel, setFitnessLevel] = useState(user?.fitness_level || '');
   const [loading, setLoading] = useState(false);
+  const [locating, setLocating] = useState(false);
 
   const fitnessLevels = [
     { id: 'beginner', label: 'Beginner', description: 'New to working out' },
@@ -66,7 +95,7 @@ export default function ProfileOnboarding() {
     if (heightUnit === 'cm') return parseFloat(heightCm) || 0;
     const feet = parseInt(heightFeet) || 0;
     const inches = parseInt(heightInches) || 0;
-    return Math.round((feet * 30.48) + (inches * 2.54));
+    return Math.round(feet * 30.48 + inches * 2.54);
   };
 
   const getWeightInKg = () => {
@@ -77,9 +106,64 @@ export default function ProfileOnboarding() {
     return w;
   };
 
+  const detectLocation = async () => {
+    setLocating(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Location permission is needed to auto-detect your city and country.');
+        return;
+      }
+
+      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      const { latitude, longitude } = loc.coords;
+
+      const resp = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+        { headers: { 'User-Agent': 'ForgeFitApp/1.0' } }
+      );
+      const data = await resp.json();
+      const address = data.address || {};
+
+      const cityValue = address.city || address.town || address.village || address.county || '';
+      const countryNameValue = address.country || '';
+      const countryCodeValue = (address.country_code || '').toUpperCase();
+
+      if (cityValue) setCity(cityValue);
+      if (countryNameValue) setCountryName(countryNameValue);
+      if (countryCodeValue) {
+        setCountryCode(countryCodeValue);
+        const matchedCountry = COUNTRIES.find((c) => c.code === countryCodeValue);
+        if (matchedCountry) setCountryName(matchedCountry.name);
+
+        const langByCountry: Record<string, string> = {
+          GB: 'en', US: 'en-US', FR: 'fr', DE: 'de', ES: 'es', IT: 'it',
+          PT: 'pt', NL: 'nl', PL: 'pl', RU: 'ru', AR: 'ar', SA: 'ar',
+          AE: 'ar', IN: 'hi', CN: 'zh', JP: 'ja', KR: 'ko', TR: 'tr',
+          TH: 'th', VN: 'vi', BR: 'pt', IE: 'en',
+        };
+        if (langByCountry[countryCodeValue]) {
+          setPreferredLanguage(langByCountry[countryCodeValue]);
+        }
+      }
+    } catch (err) {
+      Alert.alert('Location Error', 'Could not detect your location. Please enter it manually.');
+    } finally {
+      setLocating(false);
+    }
+  };
+
   const handleContinue = async () => {
-    if (!age || !fitnessLevel) {
-      Alert.alert('Required Fields', 'Please fill in age and fitness level');
+    if (!dobDay || !dobMonth || !dobYear) {
+      Alert.alert('Required Fields', 'Please enter your date of birth');
+      return;
+    }
+    if (!computedAge || computedAge < 13) {
+      Alert.alert('Invalid Date', 'Please enter a valid date of birth');
+      return;
+    }
+    if (!fitnessLevel) {
+      Alert.alert('Required Fields', 'Please select your fitness level');
       return;
     }
     if (heightUnit === 'cm' && !heightCm) {
@@ -87,7 +171,7 @@ export default function ProfileOnboarding() {
       return;
     }
     if (heightUnit === 'ft_in' && (!heightFeet || !heightInches)) {
-      Alert.alert('Required Fields', 'Please enter your height in feet and inches');
+      Alert.alert('Required Fields', 'Please enter your height');
       return;
     }
     if (!weight) {
@@ -95,14 +179,13 @@ export default function ProfileOnboarding() {
       return;
     }
 
-    const heightInCm = getHeightInCm();
-    const weightInKg = getWeightInKg();
-
     setLoading(true);
     try {
+      const weightInKg = getWeightInKg();
       await updateProfile({
-        age: parseInt(age),
-        height: heightInCm,
+        age: computedAge,
+        dob: dobStr,
+        height: getHeightInCm(),
         height_unit: heightUnit,
         height_feet: heightUnit === 'ft_in' ? parseInt(heightFeet) : undefined,
         height_inches: heightUnit === 'ft_in' ? parseInt(heightInches) : undefined,
@@ -124,14 +207,6 @@ export default function ProfileOnboarding() {
     }
   };
 
-  const handleBack = () => {
-    if (user?.profile_complete) {
-      router.back();
-    } else {
-      router.replace('/(tabs)');
-    }
-  };
-
   return (
     <View style={styles.root}>
       <ForgeVideoBackground />
@@ -139,14 +214,12 @@ export default function ProfileOnboarding() {
       <View style={styles.contentLayer}>
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.headerSection}>
-            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
-
             <View style={styles.progressBar}>
               <View style={[styles.progressFill, { width: '20%' }]} />
             </View>
-
             <View style={styles.header}>
               <Text style={styles.step}>Step 1 of 5</Text>
               <Text style={styles.title}>Let's Get to Know You</Text>
@@ -154,24 +227,60 @@ export default function ProfileOnboarding() {
             </View>
           </View>
 
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.keyboardView}
-          >
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
             <ScrollView
               contentContainerStyle={styles.scrollContent}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
               <View style={styles.form}>
-                <Input
-                  label="Age *"
-                  placeholder="Enter your age"
-                  value={age}
-                  onChangeText={setAge}
-                  keyboardType="numeric"
-                  icon="calendar-outline"
-                />
+                <Text style={styles.sectionTitleStandalone}>Date of Birth *</Text>
+                <Text style={styles.hint}>
+                  Format: DD / MM / YYYY &nbsp;·&nbsp; Age auto-calculated
+                </Text>
+
+                <View style={styles.dobRow}>
+                  <View style={styles.dobDay}>
+                    <Input
+                      placeholder="DD"
+                      value={dobDay}
+                      onChangeText={(v) => {
+                        const n = v.replace(/\D/g, '').slice(0, 2);
+                        setDobDay(n);
+                      }}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                  <View style={styles.dobMonth}>
+                    <Input
+                      placeholder="MM"
+                      value={dobMonth}
+                      onChangeText={(v) => {
+                        const n = v.replace(/\D/g, '').slice(0, 2);
+                        setDobMonth(n);
+                      }}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                  <View style={styles.dobYear}>
+                    <Input
+                      placeholder="YYYY"
+                      value={dobYear}
+                      onChangeText={(v) => {
+                        const n = v.replace(/\D/g, '').slice(0, 4);
+                        setDobYear(n);
+                      }}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                </View>
+
+                {computedAge !== null && (
+                  <View style={styles.agePill}>
+                    <Ionicons name="checkmark-circle" size={16} color={BRAND_GREEN} />
+                    <Text style={styles.agePillText}>Age: {computedAge} years old</Text>
+                  </View>
+                )}
 
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionTitle}>Height *</Text>
@@ -192,13 +301,7 @@ export default function ProfileOnboarding() {
                 </View>
 
                 {heightUnit === 'cm' ? (
-                  <Input
-                    placeholder="Height in cm"
-                    value={heightCm}
-                    onChangeText={setHeightCm}
-                    keyboardType="numeric"
-                    icon="resize-outline"
-                  />
+                  <Input placeholder="Height in cm" value={heightCm} onChangeText={setHeightCm} keyboardType="numeric" icon="resize-outline" />
                 ) : (
                   <View style={styles.row}>
                     <View style={styles.halfInput}>
@@ -235,8 +338,25 @@ export default function ProfileOnboarding() {
                   icon="scale-outline"
                 />
 
+                <View style={styles.locationHeader}>
+                  <Text style={styles.sectionTitle}>Location</Text>
+                  <TouchableOpacity
+                    style={styles.detectBtn}
+                    onPress={detectLocation}
+                    disabled={locating}
+                  >
+                    {locating ? (
+                      <ActivityIndicator size="small" color={BRAND_GREEN} />
+                    ) : (
+                      <Ionicons name="navigate" size={14} color={BRAND_GREEN} />
+                    )}
+                    <Text style={styles.detectBtnText}>
+                      {locating ? 'Detecting...' : 'Auto-detect'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
                 <SelectPicker
-                  label="Country"
                   placeholder="Select your country"
                   value={countryCode}
                   items={countryItems}
@@ -248,7 +368,6 @@ export default function ProfileOnboarding() {
                 />
 
                 <Input
-                  label="City"
                   placeholder="Enter your city"
                   value={city}
                   onChangeText={setCity}
@@ -265,7 +384,7 @@ export default function ProfileOnboarding() {
                 />
 
                 <Text style={styles.langHint}>
-                  The AI coach and app will use this language for voice coaching during workouts
+                  The AI coach will use this language for voice coaching during workouts
                 </Text>
 
                 <Text style={styles.sectionTitleStandalone}>Fitness Level *</Text>
@@ -282,9 +401,7 @@ export default function ProfileOnboarding() {
                         </Text>
                         <Text style={styles.optionDescription}>{level.description}</Text>
                       </View>
-                      {fitnessLevel === level.id && (
-                        <Ionicons name="checkmark-circle" size={24} color={BRAND_GREEN} />
-                      )}
+                      {fitnessLevel === level.id && <Ionicons name="checkmark-circle" size={24} color={BRAND_GREEN} />}
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -314,9 +431,16 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: '700', color: '#fff', marginBottom: 8 },
   subtitle: { fontSize: 16, color: '#888' },
   form: { flex: 1 },
+  hint: { color: '#666', fontSize: 12, marginBottom: 12 },
+  dobRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  dobDay: { flex: 1 },
+  dobMonth: { flex: 1 },
+  dobYear: { flex: 1.5 },
+  agePill: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(118,255,0,0.1)', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, marginBottom: 16, alignSelf: 'flex-start' },
+  agePillText: { color: BRAND_GREEN, fontSize: 13, fontWeight: '600' },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 8 },
   sectionTitle: { color: '#fff', fontSize: 14, fontWeight: '600' },
-  sectionTitleStandalone: { color: '#fff', fontSize: 14, fontWeight: '600', marginBottom: 12, marginTop: 8 },
+  sectionTitleStandalone: { color: '#fff', fontSize: 14, fontWeight: '600', marginBottom: 8, marginTop: 8 },
   unitToggle: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 8, padding: 2 },
   unitButton: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
   unitButtonActive: { backgroundColor: '#76FF00' },
@@ -324,6 +448,9 @@ const styles = StyleSheet.create({
   unitButtonTextActive: { color: '#000' },
   row: { flexDirection: 'row', gap: 12 },
   halfInput: { flex: 1 },
+  locationHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 8 },
+  detectBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(118,255,0,0.1)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: 'rgba(118,255,0,0.25)' },
+  detectBtnText: { color: BRAND_GREEN, fontSize: 12, fontWeight: '600' },
   langHint: { color: '#555', fontSize: 12, marginTop: -8, marginBottom: 16, lineHeight: 18 },
   optionsContainer: { gap: 12, marginBottom: 24 },
   optionCard: { backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', borderWidth: 2, borderColor: 'rgba(255,255,255,0.12)' },

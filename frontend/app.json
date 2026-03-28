@@ -38,7 +38,14 @@
         }
       ],
       "expo-video",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "ForgeFit uses your location to auto-detect your city and country.",
+          "locationWhenInUsePermission": "ForgeFit uses your location to auto-detect your city and country."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

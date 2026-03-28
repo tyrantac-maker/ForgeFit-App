@@ -2,16 +2,32 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View, StyleSheet, Platform } from 'react-native';
+import { LiveClock } from '../../src/components/LiveClock';
+import { useAuthStore } from '../../src/store/authStore';
+
+function ClockHeader() {
+  const { user } = useAuthStore();
+  return (
+    <View style={styles.clockWrapper}>
+      <LiveClock countryCode={(user as any)?.country_code || 'GB'} />
+    </View>
+  );
+}
 
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        headerStyle: { backgroundColor: '#0A0A0A' },
+        headerTitleStyle: { color: '#fff', fontSize: 18, fontWeight: '700' },
+        headerTintColor: '#76FF00',
+        headerRight: () => <ClockHeader />,
         tabBarStyle: styles.tabBar,
         tabBarActiveTintColor: '#76FF00',
         tabBarInactiveTintColor: '#666',
         tabBarLabelStyle: styles.tabBarLabel,
+        headerShadowVisible: false,
       }}
     >
       <Tabs.Screen
@@ -66,5 +82,9 @@ const styles = StyleSheet.create({
   tabBarLabel: {
     fontSize: 12,
     fontWeight: '500',
+  },
+  clockWrapper: {
+    marginRight: 16,
+    alignItems: 'flex-end',
   },
 });

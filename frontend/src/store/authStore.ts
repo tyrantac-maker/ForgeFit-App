@@ -20,6 +20,7 @@ export interface User {
   country_code?: string;
   location?: string;
   preferred_language?: string;
+  dob?: string;
   fitness_level?: string;
   starting_weight?: number;
   goal_weight?: number;
@@ -117,19 +118,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return false;
       }
 
-      const response = await fetch(`${API_URL}/api/auth/me`, {
+      const refreshResponse = await fetch(`${API_URL}/api/auth/refresh`, {
+        method: 'POST',
         headers: { 'Authorization': `Bearer ${storedToken}` },
-        credentials: 'include',
       });
 
-      if (!response.ok) {
+      if (!refreshResponse.ok) {
         await AsyncStorage.removeItem('token');
         set({ user: null, token: null, isAuthenticated: false, isLoading: false });
         return false;
       }
 
-      const user = await response.json();
-      set({ user, token: storedToken, isAuthenticated: true, isLoading: false });
+      const { token: newToken, user } = await refreshResponse.json();
+      await AsyncStorage.setItem('token', newToken);
+      set({ user, token: newToken, isAuthenticated: true, isLoading: false });
       return true;
     } catch (error) {
       console.log('Auth check error:', error);
@@ -164,11 +166,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(data),
-      credentials: 'include',
     });
 
     if (!response.ok) {
-      throw new Error('Profile update failed');
+      let detail = `Error ${response.status}`;
+      try {
+        const errBody = await response.json();
+        detail = errBody.detail || JSON.stringify(errBody);
+      } catch {}
+      throw new Error(detail);
     }
 
     const updatedUser = await response.json();
