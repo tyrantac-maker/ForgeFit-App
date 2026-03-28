@@ -18,6 +18,7 @@ import { Button } from '../../src/components/Button';
 import { Card } from '../../src/components/Card';
 import { ExerciseAnimation } from '../../src/components/ExerciseAnimation';
 import * as Speech from 'expo-speech';
+import { getTranslation, LANGUAGES } from '../../src/data/countries';
 
 interface SetProgress {
   completed: boolean;
@@ -28,8 +29,16 @@ interface SetProgress {
 export default function WorkoutSessionScreen() {
   const router = useRouter();
   const { sessionId, workoutId } = useLocalSearchParams<{ sessionId: string; workoutId: string }>();
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const { workouts, currentSession, completeSession, logRepFailure, logAdjustment } = useWorkoutStore();
+
+  const langCode = (user as any)?.preferred_language || 'en';
+  const speechLang = LANGUAGES.find((l) => l.code === langCode)?.speechCode || 'en-GB';
+
+  const speak = (key: string, rate = 0.9) => {
+    const text = getTranslation(langCode, key);
+    Speech.speak(text, { rate, language: speechLang });
+  };
 
   const workout = workouts.find((w) => w.id === workoutId);
   const exercises = workout?.exercises || [];
@@ -87,13 +96,14 @@ export default function WorkoutSessionScreen() {
             setIsResting(false);
             Vibration.vibrate(500);
             if (voiceEnabled) {
-              Speech.speak('Rest complete. Get ready for your next set.', { rate: 0.9 });
+              speak('restComplete');
             }
             return 0;
           }
           // Countdown voice
           if (voiceEnabled && prev <= 5) {
-            Speech.speak(String(prev - 1), { rate: 1.2 });
+            const countKey = `countdown${prev - 1}` as any;
+            speak(countKey, 1.2);
           }
           return prev - 1;
         });
@@ -122,7 +132,7 @@ export default function WorkoutSessionScreen() {
     setSetsProgress(newProgress);
 
     if (voiceEnabled) {
-      Speech.speak('Set complete! Good work.', { rate: 0.9 });
+      speak('setComplete');
     }
 
     // Move to next set or exercise
@@ -160,7 +170,7 @@ export default function WorkoutSessionScreen() {
       });
 
       if (voiceEnabled) {
-        Speech.speak('Rep failure logged. Take your time.', { rate: 0.9 });
+        speak('repFailure');
       }
     } catch (error) {
       console.error('Failed to log rep failure:', error);
@@ -204,7 +214,7 @@ export default function WorkoutSessionScreen() {
             try {
               await completeSession(token, sessionId);
               if (voiceEnabled) {
-                Speech.speak('Congratulations! Workout complete!', { rate: 0.9 });
+                speak('workoutComplete');
               }
               router.replace('/(tabs)');
             } catch (error) {

@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/store/authStore';
 import { Card } from '../../src/components/Card';
 import { Button } from '../../src/components/Button';
+import { LANGUAGES, COUNTRIES } from '../../src/data/countries';
 
 function formatHeight(user: any): string {
   if (!user?.height) return '-';
@@ -92,7 +93,25 @@ export default function ProfileScreen() {
           <ProfileItem icon="calendar-outline" label="Age" value={user?.age ? `${user.age} years` : '-'} />
           <ProfileItem icon="resize-outline" label="Height" value={formatHeight(user)} />
           <ProfileItem icon="scale-outline" label="Weight" value={formatWeight(user?.weight, user?.weight_unit, 'weight')} />
-          <ProfileItem icon="location-outline" label="Location" value={user?.location || user?.country || '-'} />
+          <ProfileItem
+            icon="globe-outline"
+            label="Country"
+            value={
+              user?.country
+                ? `${COUNTRIES.find((c) => c.code === user.country_code)?.flag || ''} ${user.country}`.trim()
+                : '-'
+            }
+          />
+          <ProfileItem icon="location-outline" label="City" value={user?.location || '-'} />
+          <ProfileItem
+            icon="language-outline"
+            label="Language"
+            value={
+              user?.preferred_language
+                ? `${LANGUAGES.find((l) => l.code === user.preferred_language)?.flag || ''} ${LANGUAGES.find((l) => l.code === user.preferred_language)?.name || user.preferred_language}`.trim()
+                : '🇬🇧 English'
+            }
+          />
         </Card>
 
         <Card style={styles.card}>

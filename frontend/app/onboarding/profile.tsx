@@ -15,9 +15,19 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/store/authStore';
 import { Button } from '../../src/components/Button';
 import { Input } from '../../src/components/Input';
+import { SelectPicker } from '../../src/components/SelectPicker';
+import { COUNTRIES, LANGUAGES } from '../../src/data/countries';
 import ForgeVideoBackground from '../../src/components/ForgeVideoBackground';
 
 const BRAND_GREEN = '#76FF00';
+
+const countryItems = COUNTRIES.map((c) => ({ label: c.name, value: c.code, icon: c.flag }));
+const languageItems = LANGUAGES.map((l) => ({
+  label: l.name,
+  sublabel: l.nativeName !== l.name ? l.nativeName : undefined,
+  value: l.code,
+  icon: l.flag,
+}));
 
 export default function ProfileOnboarding() {
   const router = useRouter();
@@ -39,8 +49,10 @@ export default function ProfileOnboarding() {
     return String(kg);
   };
   const [weight, setWeight] = useState(getInitialWeight());
-  const [country, setCountry] = useState(user?.country || '');
-  const [location, setLocation] = useState(user?.location || '');
+  const [countryCode, setCountryCode] = useState(user?.country_code || '');
+  const [countryName, setCountryName] = useState(user?.country || '');
+  const [city, setCity] = useState(user?.location || '');
+  const [preferredLanguage, setPreferredLanguage] = useState(user?.preferred_language || 'en');
   const [fitnessLevel, setFitnessLevel] = useState(user?.fitness_level || '');
   const [loading, setLoading] = useState(false);
 
@@ -96,12 +108,14 @@ export default function ProfileOnboarding() {
         height_inches: heightUnit === 'ft_in' ? parseInt(heightInches) : undefined,
         weight: weightInKg,
         weight_unit: weightUnit,
-        country,
-        location,
+        country: countryName,
+        country_code: countryCode,
+        location: city,
+        preferred_language: preferredLanguage,
         fitness_level: fitnessLevel,
         starting_weight: weightInKg,
         onboarding_step: 1,
-      });
+      } as any);
       router.push('/onboarding/goals');
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to save profile');
@@ -221,14 +235,38 @@ export default function ProfileOnboarding() {
                   icon="scale-outline"
                 />
 
-                <View style={styles.row}>
-                  <View style={styles.halfInput}>
-                    <Input label="Country" placeholder="Country" value={country} onChangeText={setCountry} icon="globe-outline" />
-                  </View>
-                  <View style={styles.halfInput}>
-                    <Input label="City" placeholder="City" value={location} onChangeText={setLocation} icon="location-outline" />
-                  </View>
-                </View>
+                <SelectPicker
+                  label="Country"
+                  placeholder="Select your country"
+                  value={countryCode}
+                  items={countryItems}
+                  onSelect={(val, item) => {
+                    setCountryCode(val);
+                    setCountryName(item.label);
+                  }}
+                  icon="globe-outline"
+                />
+
+                <Input
+                  label="City"
+                  placeholder="Enter your city"
+                  value={city}
+                  onChangeText={setCity}
+                  icon="location-outline"
+                />
+
+                <SelectPicker
+                  label="Preferred Language"
+                  placeholder="Select your language"
+                  value={preferredLanguage}
+                  items={languageItems}
+                  onSelect={(val) => setPreferredLanguage(val)}
+                  icon="language-outline"
+                />
+
+                <Text style={styles.langHint}>
+                  The AI coach and app will use this language for voice coaching during workouts
+                </Text>
 
                 <Text style={styles.sectionTitleStandalone}>Fitness Level *</Text>
                 <View style={styles.optionsContainer}>
@@ -262,154 +300,37 @@ export default function ProfileOnboarding() {
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  contentLayer: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 2,
-    elevation: 2,
-  },
-  safeArea: {
-    flex: 1,
-  },
-  headerSection: {
-    padding: 24,
-    paddingBottom: 0,
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: 24,
-    paddingTop: 8,
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  progressBar: {
-    height: 4,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 2,
-    marginBottom: 24,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#76FF00',
-    borderRadius: 2,
-  },
-  header: {
-    marginBottom: 16,
-  },
-  step: {
-    color: '#76FF00',
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#fff',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#888',
-  },
-  form: {
-    flex: 1,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-    marginTop: 8,
-  },
-  sectionTitle: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  sectionTitleStandalone: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 12,
-    marginTop: 8,
-  },
-  unitToggle: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 8,
-    padding: 2,
-  },
-  unitButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  unitButtonActive: {
-    backgroundColor: '#76FF00',
-  },
-  unitButtonText: {
-    color: '#888',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  unitButtonTextActive: {
-    color: '#000',
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  halfInput: {
-    flex: 1,
-  },
-  optionsContainer: {
-    gap: 12,
-    marginBottom: 24,
-  },
-  optionCard: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.12)',
-  },
-  optionCardSelected: {
-    borderColor: '#76FF00',
-    backgroundColor: 'rgba(118,255,0,0.08)',
-  },
-  optionContent: {
-    flex: 1,
-  },
-  optionLabel: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  optionLabelSelected: {
-    color: '#76FF00',
-  },
-  optionDescription: {
-    color: '#888',
-    fontSize: 14,
-  },
-  continueButton: {
-    marginTop: 'auto',
-  },
+  root: { flex: 1, backgroundColor: '#000' },
+  contentLayer: { ...StyleSheet.absoluteFillObject, zIndex: 2, elevation: 2 },
+  safeArea: { flex: 1 },
+  headerSection: { padding: 24, paddingBottom: 0 },
+  keyboardView: { flex: 1 },
+  scrollContent: { flexGrow: 1, padding: 24, paddingTop: 8 },
+  backButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  progressBar: { height: 4, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 2, marginBottom: 24 },
+  progressFill: { height: '100%', backgroundColor: '#76FF00', borderRadius: 2 },
+  header: { marginBottom: 16 },
+  step: { color: '#76FF00', fontSize: 14, fontWeight: '600', marginBottom: 8 },
+  title: { fontSize: 28, fontWeight: '700', color: '#fff', marginBottom: 8 },
+  subtitle: { fontSize: 16, color: '#888' },
+  form: { flex: 1 },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 8 },
+  sectionTitle: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  sectionTitleStandalone: { color: '#fff', fontSize: 14, fontWeight: '600', marginBottom: 12, marginTop: 8 },
+  unitToggle: { flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 8, padding: 2 },
+  unitButton: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
+  unitButtonActive: { backgroundColor: '#76FF00' },
+  unitButtonText: { color: '#888', fontSize: 12, fontWeight: '600' },
+  unitButtonTextActive: { color: '#000' },
+  row: { flexDirection: 'row', gap: 12 },
+  halfInput: { flex: 1 },
+  langHint: { color: '#555', fontSize: 12, marginTop: -8, marginBottom: 16, lineHeight: 18 },
+  optionsContainer: { gap: 12, marginBottom: 24 },
+  optionCard: { backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', borderWidth: 2, borderColor: 'rgba(255,255,255,0.12)' },
+  optionCardSelected: { borderColor: '#76FF00', backgroundColor: 'rgba(118,255,0,0.08)' },
+  optionContent: { flex: 1 },
+  optionLabel: { color: '#fff', fontSize: 16, fontWeight: '600', marginBottom: 4 },
+  optionLabelSelected: { color: '#76FF00' },
+  optionDescription: { color: '#888', fontSize: 14 },
+  continueButton: { marginTop: 'auto' },
 });

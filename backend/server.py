@@ -90,13 +90,16 @@ class ProfileUpdate(BaseModel):
     weight: Optional[float] = None
     weight_unit: Optional[str] = None  # 'kg', 'lbs', 'stone'
     country: Optional[str] = None
+    country_code: Optional[str] = None
     location: Optional[str] = None
+    preferred_language: Optional[str] = None
     fitness_level: Optional[str] = None
     starting_weight: Optional[float] = None
     goal_weight: Optional[float] = None
     goals: Optional[List[str]] = None
     training_location: Optional[str] = None
     gym_name: Optional[str] = None
+    gym_location: Optional[str] = None
     equipment: Optional[List[Dict[str, Any]]] = None
     custom_equipment: Optional[List[Dict[str, Any]]] = None
     schedule: Optional[Dict[str, Any]] = None
@@ -256,8 +259,15 @@ async def get_current_user(request: Request) -> dict:
         payload = decode_jwt_token(session_token)
         user = await db.users.find_one({"user_id": payload["user_id"]}, {"_id": 0})
         if not user:
+            # Fallback: look up by email in case user_id changed (e.g. after restart)
+            email = payload.get("email")
+            if email:
+                user = await db.users.find_one({"email": email}, {"_id": 0})
+        if not user:
             raise HTTPException(status_code=401, detail="User not found")
         return user
+    except HTTPException:
+        raise
     except:
         raise HTTPException(status_code=401, detail="Invalid session")
 
@@ -1471,22 +1481,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+ADMIN_USER_ID = "user_forgefit_admin"
+
 @app.on_event("startup")
 async def ensure_admin_account():
+    from datetime import datetime, timezone
     existing = await db.users.find_one({"email": "admin@forgefit.dev"})
     if not existing:
-        import uuid as _uuid
-        from datetime import datetime, timezone
-        user_id = f"user_{_uuid.uuid4().hex[:12]}"
         hashed = hash_password("ForgeFit@2026")
         await db.users.insert_one({
-            "user_id": user_id,
+            "user_id": ADMIN_USER_ID,
             "email": "admin@forgefit.dev",
             "name": "Admin",
             "password": hashed,
             "role": "admin",
             "created_at": datetime.now(timezone.utc)
         })
+    elif existing.get("user_id") != ADMIN_USER_ID:
+        # Migrate old random user_id to fixed ID to keep tokens valid
+        await db.users.update_one(
+            {"email": "admin@forgefit.dev"},
+            {"$set": {"user_id": ADMIN_USER_ID}}
+        )
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

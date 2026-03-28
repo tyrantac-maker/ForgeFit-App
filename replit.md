@@ -2,6 +2,14 @@
 
 A React Native Expo fitness tracker (SDK 54) with a Python FastAPI + MongoDB backend.
 
+## Recent Features Added
+- **Fixed profile update bug**: Admin account now uses stable `user_id: "user_forgefit_admin"` — tokens remain valid across backend restarts. Fallback JWT auth by email added.
+- **Country dropdown**: `SelectPicker` component with searchable modal, 75+ countries with flags.
+- **Language preference**: 18 languages (Arabic, Chinese, French, German, Hindi, etc.) with flag icons. Stored in `preferred_language` user field.
+- **Gym finder**: Country-specific gym chain chips + Google Maps deep-link to find/view gyms.
+- **Language-aware TTS**: Workout voice coach speaks in user's chosen language using `expo-speech` with translated phrases in 15 languages.
+- **Profile tab**: Shows country flag, city, and language preference.
+
 ## Architecture
 
 ### Frontend (`/frontend`)

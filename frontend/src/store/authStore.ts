@@ -17,7 +17,9 @@ export interface User {
   weight?: number;
   weight_unit?: 'kg' | 'lbs' | 'stone';
   country?: string;
+  country_code?: string;
   location?: string;
+  preferred_language?: string;
   fitness_level?: string;
   starting_weight?: number;
   goal_weight?: number;
