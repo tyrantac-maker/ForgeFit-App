@@ -52,4 +52,4 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd frontend && RCT_METRO_PORT=8081 npx expo start --tunnel --clear"
+args = "cd frontend && REACT_NATIVE_PACKAGER_HOSTNAME=e83b2e91-fba9-47b3-9274-d58a092b36b1-00-2b1jg0mjp8yxk.expo.riker.replit.dev RCT_METRO_PORT=8081 npx expo start --port 8081 --clear"
