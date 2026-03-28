@@ -17,18 +17,20 @@ import { Button } from '../../src/components/Button';
 import { Input } from '../../src/components/Input';
 import { getGymChains } from '../../src/data/countries';
 import ForgeVideoBackground from '../../src/components/ForgeVideoBackground';
+import { useTranslation } from '../../src/hooks/useTranslation';
 
 const BRAND_GREEN = '#76FF00';
 
-const LOCATIONS = [
-  { id: 'home', label: 'Home', icon: 'home-outline', description: 'Workout at home with available equipment' },
-  { id: 'gym', label: 'Gym', icon: 'barbell-outline', description: 'Access to full gym equipment' },
-  { id: 'both', label: 'Both', icon: 'swap-horizontal-outline', description: 'Mix of home and gym workouts' },
+const LOCATION_IDS = [
+  { id: 'home', labelKey: 'home_training' as const, icon: 'home-outline', descKey: 'home_desc' as const },
+  { id: 'gym', labelKey: 'gym_training' as const, icon: 'barbell-outline', descKey: 'gym_desc' as const },
+  { id: 'both', labelKey: 'both_training' as const, icon: 'swap-horizontal-outline', descKey: 'both_desc' as const },
 ];
 
 export default function LocationOnboarding() {
   const router = useRouter();
   const { user, updateProfile } = useAuthStore();
+  const { t } = useTranslation();
 
   const [trainingLocation, setTrainingLocation] = useState(user?.training_location || '');
   const [gymName, setGymName] = useState(user?.gym_name || '');
@@ -41,7 +43,7 @@ export default function LocationOnboarding() {
 
   const handleContinue = async () => {
     if (!trainingLocation) {
-      Alert.alert('Select Location', "Please select where you'll be training");
+      Alert.alert(t('error'), t('select_training_location'));
       return;
     }
     setLoading(true);
@@ -53,7 +55,7 @@ export default function LocationOnboarding() {
       });
       router.push('/onboarding/equipment');
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to save location');
+      Alert.alert(t('error'), error.message || t('save_failed'));
     } finally {
       setLoading(false);
     }
@@ -85,7 +87,10 @@ export default function LocationOnboarding() {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.canGoBack() ? router.back() : router.replace('/onboarding/goals')}
+            >
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
 
@@ -94,13 +99,13 @@ export default function LocationOnboarding() {
             </View>
 
             <View style={styles.header}>
-              <Text style={styles.step}>Step 3 of 5</Text>
-              <Text style={styles.title}>Where Will You Train?</Text>
-              <Text style={styles.subtitle}>We'll customize workouts based on your environment</Text>
+              <Text style={styles.step}>{t('step3')}</Text>
+              <Text style={styles.title}>{t('training_location')}</Text>
+              <Text style={styles.subtitle}>{t('training_location_subtitle')}</Text>
             </View>
 
             <View style={styles.optionsContainer}>
-              {LOCATIONS.map((loc) => (
+              {LOCATION_IDS.map((loc) => (
                 <TouchableOpacity
                   key={loc.id}
                   style={[styles.locationCard, trainingLocation === loc.id && styles.locationCardSelected]}
@@ -111,9 +116,9 @@ export default function LocationOnboarding() {
                   </View>
                   <View style={styles.locationContent}>
                     <Text style={[styles.locationLabel, trainingLocation === loc.id && styles.locationLabelSelected]}>
-                      {loc.label}
+                      {t(loc.labelKey)}
                     </Text>
-                    <Text style={styles.locationDescription}>{loc.description}</Text>
+                    <Text style={styles.locationDescription}>{t(loc.descKey)}</Text>
                   </View>
                   {trainingLocation === loc.id && <Ionicons name="checkmark-circle" size={24} color={BRAND_GREEN} />}
                 </TouchableOpacity>
@@ -122,12 +127,12 @@ export default function LocationOnboarding() {
 
             {showGymInput && (
               <View style={styles.gymSection}>
-                <Text style={styles.sectionTitle}>Your Gym</Text>
+                <Text style={styles.sectionTitle}>{t('gym_name')}</Text>
 
                 {gymChains.length > 0 && (
                   <>
                     <Text style={styles.sectionSubtitle}>
-                      Popular gyms in {country || 'your country'}
+                      Popular gyms in {country || 'your area'}
                     </Text>
                     <ScrollView
                       horizontal
@@ -151,7 +156,7 @@ export default function LocationOnboarding() {
                 )}
 
                 <Input
-                  placeholder="Type gym name or select above"
+                  placeholder={t('gym_placeholder')}
                   value={gymName}
                   onChangeText={setGymName}
                   icon="business-outline"
@@ -160,7 +165,7 @@ export default function LocationOnboarding() {
                 <View style={styles.mapsButtonRow}>
                   <TouchableOpacity style={styles.mapsButton} onPress={openGoogleMapsGyms}>
                     <Ionicons name="map-outline" size={16} color={BRAND_GREEN} />
-                    <Text style={styles.mapsButtonText}>Find Gyms Near Me on Maps</Text>
+                    <Text style={styles.mapsButtonText}>{t('find_gyms_near')}</Text>
                   </TouchableOpacity>
 
                   {gymName.trim().length > 0 && (
@@ -178,7 +183,7 @@ export default function LocationOnboarding() {
             )}
 
             <Button
-              title="Continue"
+              title={t('continue')}
               onPress={handleContinue}
               loading={loading}
               size="large"

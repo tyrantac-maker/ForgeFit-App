@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { View, StyleSheet, Platform } from 'react-native';
 import { LiveClock } from '../../src/components/LiveClock';
 import { useAuthStore } from '../../src/store/authStore';
+import { useTranslation } from '../../src/hooks/useTranslation';
 
 function ClockHeader() {
   const { user } = useAuthStore();
@@ -15,6 +16,7 @@ function ClockHeader() {
 }
 
 export default function TabsLayout() {
+  const { t } = useTranslation();
   return (
     <Tabs
       screenOptions={{
@@ -33,7 +35,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Dashboard',
+          title: t('home'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
@@ -42,7 +44,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="workouts"
         options={{
-          title: 'Workouts',
+          title: t('workouts'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="barbell" size={size} color={color} />
           ),
@@ -51,7 +53,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="progress"
         options={{
-          title: 'Progress',
+          title: t('progress'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="analytics" size={size} color={color} />
           ),
@@ -60,7 +62,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: t('profile'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
           ),

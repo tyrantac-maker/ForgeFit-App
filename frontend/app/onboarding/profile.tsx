@@ -19,6 +19,7 @@ import { Input } from '../../src/components/Input';
 import { SelectPicker } from '../../src/components/SelectPicker';
 import { COUNTRIES, LANGUAGES } from '../../src/data/countries';
 import ForgeVideoBackground from '../../src/components/ForgeVideoBackground';
+import { useTranslation } from '../../src/hooks/useTranslation';
 import * as Location from 'expo-location';
 
 const BRAND_GREEN = '#76FF00';
@@ -53,7 +54,8 @@ function formatDob(day: string, month: string, year: string): string {
 
 export default function ProfileOnboarding() {
   const router = useRouter();
-  const { user, updateProfile } = useAuthStore();
+  const { user, updateProfile, logout } = useAuthStore();
+  const { t } = useTranslation();
 
   const [dobDay, setDobDay] = useState('');
   const [dobMonth, setDobMonth] = useState('');
@@ -106,12 +108,41 @@ export default function ProfileOnboarding() {
     return w;
   };
 
+  const LANG_BY_COUNTRY: Record<string, string> = {
+    GB: 'en', US: 'en-US', FR: 'fr', DE: 'de', ES: 'es', IT: 'it',
+    PT: 'pt', NL: 'nl', PL: 'pl', RU: 'ru', AR: 'ar', SA: 'ar',
+    AE: 'ar', IN: 'hi', CN: 'zh', JP: 'ja', KR: 'ko', TR: 'tr',
+    TH: 'th', VN: 'vi', BR: 'pt', IE: 'en',
+  };
+
+  const showLanguageSuggestion = (detectedCode: string) => {
+    const suggestedLang = LANG_BY_COUNTRY[detectedCode];
+    if (!suggestedLang || suggestedLang === preferredLanguage) return;
+    const langItem = LANGUAGES.find((l) => l.code === suggestedLang);
+    if (!langItem) return;
+    Alert.alert(
+      t('language_suggestion_title'),
+      t('language_suggestion_msg', { language: langItem.nativeName || langItem.name }),
+      [
+        { text: t('keep_current'), style: 'cancel' },
+        { text: t('switch_language'), onPress: () => setPreferredLanguage(suggestedLang) },
+      ]
+    );
+  };
+
+  const handleCountryCodeChange = (newCode: string) => {
+    setCountryCode(newCode);
+    const matched = COUNTRIES.find((c) => c.code === newCode);
+    if (matched) setCountryName(matched.name);
+    showLanguageSuggestion(newCode);
+  };
+
   const detectLocation = async () => {
     setLocating(true);
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Location permission is needed to auto-detect your city and country.');
+        Alert.alert(t('permission_denied'), t('location_permission_msg'));
         return;
       }
 
@@ -135,19 +166,10 @@ export default function ProfileOnboarding() {
         setCountryCode(countryCodeValue);
         const matchedCountry = COUNTRIES.find((c) => c.code === countryCodeValue);
         if (matchedCountry) setCountryName(matchedCountry.name);
-
-        const langByCountry: Record<string, string> = {
-          GB: 'en', US: 'en-US', FR: 'fr', DE: 'de', ES: 'es', IT: 'it',
-          PT: 'pt', NL: 'nl', PL: 'pl', RU: 'ru', AR: 'ar', SA: 'ar',
-          AE: 'ar', IN: 'hi', CN: 'zh', JP: 'ja', KR: 'ko', TR: 'tr',
-          TH: 'th', VN: 'vi', BR: 'pt', IE: 'en',
-        };
-        if (langByCountry[countryCodeValue]) {
-          setPreferredLanguage(langByCountry[countryCodeValue]);
-        }
+        showLanguageSuggestion(countryCodeValue);
       }
     } catch (err) {
-      Alert.alert('Location Error', 'Could not detect your location. Please enter it manually.');
+      Alert.alert(t('error'), t('location_error_msg'));
     } finally {
       setLocating(false);
     }
@@ -214,16 +236,36 @@ export default function ProfileOnboarding() {
       <View style={styles.contentLayer}>
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.headerSection}>
-            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => {
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  Alert.alert(
+                    t('cancel_setup'),
+                    t('cancel_setup_msg'),
+                    [
+                      { text: t('stay'), style: 'cancel' },
+                      {
+                        text: t('log_out'),
+                        style: 'destructive',
+                        onPress: () => { logout(); router.replace('/'); },
+                      },
+                    ]
+                  );
+                }
+              }}
+            >
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
             <View style={styles.progressBar}>
               <View style={[styles.progressFill, { width: '20%' }]} />
             </View>
             <View style={styles.header}>
-              <Text style={styles.step}>Step 1 of 5</Text>
-              <Text style={styles.title}>Let's Get to Know You</Text>
-              <Text style={styles.subtitle}>This helps us personalize your workouts</Text>
+              <Text style={styles.step}>{t('step1')}</Text>
+              <Text style={styles.title}>{t('lets_know_you')}</Text>
+              <Text style={styles.subtitle}>{t('profile_subtitle')}</Text>
             </View>
           </View>
 
@@ -357,18 +399,17 @@ export default function ProfileOnboarding() {
                 </View>
 
                 <SelectPicker
-                  placeholder="Select your country"
+                  placeholder={t('select_country')}
                   value={countryCode}
                   items={countryItems}
-                  onSelect={(val, item) => {
-                    setCountryCode(val);
-                    setCountryName(item.label);
+                  onSelect={(val) => {
+                    handleCountryCodeChange(val);
                   }}
                   icon="globe-outline"
                 />
 
                 <Input
-                  placeholder="Enter your city"
+                  placeholder={t('enter_city')}
                   value={city}
                   onChangeText={setCity}
                   icon="location-outline"

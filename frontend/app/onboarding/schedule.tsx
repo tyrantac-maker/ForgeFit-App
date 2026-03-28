@@ -15,6 +15,7 @@ import { useAuthStore } from '../../src/store/authStore';
 import { Button } from '../../src/components/Button';
 import { BodyAnatomy } from '../../src/components/BodyAnatomy';
 import ForgeVideoBackground from '../../src/components/ForgeVideoBackground';
+import { useTranslation } from '../../src/hooks/useTranslation';
 
 // Muscle groups organized by body region
 const MUSCLE_GROUPS = {
@@ -127,6 +128,7 @@ type DayMuscles = {
 export default function ScheduleOnboarding() {
   const router = useRouter();
   const { user, updateProfile } = useAuthStore();
+  const { t } = useTranslation();
   
   const [workoutSplit, setWorkoutSplit] = useState(user?.workout_preferences?.split || 'full_body');
   const [numDays, setNumDays] = useState(user?.schedule?.num_days || 3);
@@ -226,7 +228,11 @@ export default function ScheduleOnboarding() {
   };
 
   const handleBack = () => {
-    router.back();
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/onboarding/equipment');
+    }
   };
 
   return (

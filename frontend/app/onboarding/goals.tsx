@@ -14,22 +14,24 @@ import { useAuthStore } from '../../src/store/authStore';
 import { Button } from '../../src/components/Button';
 import { Input } from '../../src/components/Input';
 import ForgeVideoBackground from '../../src/components/ForgeVideoBackground';
+import { useTranslation } from '../../src/hooks/useTranslation';
 
 const BRAND_GREEN = '#76FF00';
 
 const GOALS = [
-  { id: 'muscle_gain', label: 'Build Muscle', icon: 'barbell-outline', description: 'Increase muscle mass and size' },
-  { id: 'strength', label: 'Get Stronger', icon: 'fitness-outline', description: 'Improve strength and power' },
-  { id: 'fat_loss', label: 'Lose Fat', icon: 'flame-outline', description: 'Burn fat and get lean' },
-  { id: 'conditioning', label: 'Conditioning', icon: 'pulse-outline', description: 'Improve cardiovascular fitness' },
-  { id: 'endurance', label: 'Build Endurance', icon: 'timer-outline', description: 'Increase stamina' },
-  { id: 'calisthenics', label: 'Calisthenics', icon: 'body-outline', description: 'Master bodyweight movements' },
-  { id: 'general_fitness', label: 'General Fitness', icon: 'heart-outline', description: 'Overall health and wellness' },
+  { id: 'muscle_gain', labelKey: 'build_muscle' as const, icon: 'barbell-outline', descKey: 'increase_muscle' as const },
+  { id: 'strength', labelKey: 'get_stronger' as const, icon: 'fitness-outline', descKey: 'improve_strength' as const },
+  { id: 'fat_loss', labelKey: 'lose_fat' as const, icon: 'flame-outline', descKey: 'burn_fat' as const },
+  { id: 'conditioning', labelKey: 'conditioning' as const, icon: 'pulse-outline', descKey: 'improve_cardio' as const },
+  { id: 'endurance', labelKey: 'build_endurance' as const, icon: 'timer-outline', descKey: 'increase_stamina' as const },
+  { id: 'calisthenics', labelKey: 'calisthenics' as const, icon: 'body-outline', descKey: 'master_bodyweight' as const },
+  { id: 'general_fitness', labelKey: 'general_fitness' as const, icon: 'heart-outline', descKey: 'overall_health' as const },
 ];
 
 export default function GoalsOnboarding() {
   const router = useRouter();
   const { user, updateProfile } = useAuthStore();
+  const { t } = useTranslation();
 
   const weightUnit = user?.weight_unit || 'kg';
 
@@ -61,7 +63,7 @@ export default function GoalsOnboarding() {
 
   const handleContinue = async () => {
     if (selectedGoals.length === 0) {
-      Alert.alert('Select Goals', 'Please select at least one fitness goal');
+      Alert.alert(t('error'), t('select_one_goal'));
       return;
     }
     setLoading(true);
@@ -73,7 +75,7 @@ export default function GoalsOnboarding() {
       });
       router.push('/onboarding/location');
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to save goals');
+      Alert.alert(t('error'), error.message || t('save_failed'));
     } finally {
       setLoading(false);
     }
@@ -89,7 +91,10 @@ export default function GoalsOnboarding() {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.canGoBack() ? router.back() : router.replace('/onboarding/profile')}
+            >
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
 
@@ -98,9 +103,9 @@ export default function GoalsOnboarding() {
             </View>
 
             <View style={styles.header}>
-              <Text style={styles.step}>Step 2 of 5</Text>
-              <Text style={styles.title}>What Are Your Goals?</Text>
-              <Text style={styles.subtitle}>Select all that apply to you</Text>
+              <Text style={styles.step}>{t('step2')}</Text>
+              <Text style={styles.title}>{t('what_are_goals')}</Text>
+              <Text style={styles.subtitle}>{t('select_all_apply')}</Text>
             </View>
 
             <View style={styles.goalsGrid}>
@@ -124,9 +129,9 @@ export default function GoalsOnboarding() {
                     styles.goalLabel,
                     selectedGoals.includes(goal.id) && styles.goalLabelSelected,
                   ]}>
-                    {goal.label}
+                    {t(goal.labelKey)}
                   </Text>
-                  <Text style={styles.goalDescription}>{goal.description}</Text>
+                  <Text style={styles.goalDescription}>{t(goal.descKey)}</Text>
                   {selectedGoals.includes(goal.id) && (
                     <View style={styles.checkmark}>
                       <Ionicons name="checkmark" size={16} color="#000" />
@@ -138,10 +143,10 @@ export default function GoalsOnboarding() {
 
             <View style={styles.weightGoalSection}>
               <Text style={styles.sectionTitle}>
-                Target Weight (Optional) — {weightUnit === 'stone' ? 'st' : weightUnit}
+                {t('target_weight')} — {weightUnit === 'stone' ? 'st' : weightUnit}
               </Text>
               <Input
-                placeholder={`Goal weight in ${weightUnit === 'stone' ? 'stone' : weightUnit}`}
+                placeholder={`${t('target_weight')} (${weightUnit === 'stone' ? 'stone' : weightUnit})`}
                 value={goalWeight}
                 onChangeText={setGoalWeight}
                 keyboardType="numeric"
@@ -150,7 +155,7 @@ export default function GoalsOnboarding() {
             </View>
 
             <Button
-              title="Continue"
+              title={t('continue')}
               onPress={handleContinue}
               loading={loading}
               size="large"

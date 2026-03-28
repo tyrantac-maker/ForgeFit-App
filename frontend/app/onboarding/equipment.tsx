@@ -18,6 +18,7 @@ import { Button } from '../../src/components/Button';
 import { Input } from '../../src/components/Input';
 import { saveEquipment } from '../../src/utils/api';
 import ForgeVideoBackground from '../../src/components/ForgeVideoBackground';
+import { useTranslation } from '../../src/hooks/useTranslation';
 
 interface EquipmentItem {
   name: string;
@@ -44,6 +45,7 @@ const CATEGORIES = [
 export default function EquipmentOnboarding() {
   const router = useRouter();
   const { user, token, updateProfile } = useAuthStore();
+  const { t } = useTranslation();
   const { fetchEquipmentCatalog, equipmentCatalog } = useWorkoutStore();
   
   const [equipment, setEquipment] = useState<EquipmentItem[]>([]);
@@ -180,7 +182,11 @@ export default function EquipmentOnboarding() {
   };
 
   const handleBack = () => {
-    router.back();
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/onboarding/location');
+    }
   };
 
   const filteredEquipment = activeCategory === 'all'
@@ -204,9 +210,9 @@ export default function EquipmentOnboarding() {
         </View>
 
         <View style={styles.header}>
-          <Text style={styles.step}>Step 4 of 5</Text>
-          <Text style={styles.title}>Your Equipment</Text>
-          <Text style={styles.subtitle}>Select what you have access to</Text>
+          <Text style={styles.step}>{t('step4')}</Text>
+          <Text style={styles.title}>{t('your_equipment')}</Text>
+          <Text style={styles.subtitle}>{t('equipment_subtitle')}</Text>
         </View>
 
         {/* Weight Unit Toggle */}
@@ -333,7 +339,7 @@ export default function EquipmentOnboarding() {
       <View style={styles.footer}>
         <Text style={styles.selectedCount}>{selectedCount} items selected</Text>
         <Button
-          title="Continue"
+          title={t('continue')}
           onPress={handleContinue}
           loading={loading}
           size="large"

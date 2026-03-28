@@ -162,25 +162,54 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   updateProfile: async (data: Partial<User>) => {
     const token = get().token;
-    const response = await fetch(`${API_URL}/api/profile`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
+    const maxRetries = 2;
+    let lastError: Error = new Error('Request failed');
 
-    if (!response.ok) {
-      let detail = `Error ${response.status}`;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      if (attempt > 0) {
+        await new Promise((r) => setTimeout(r, 1000 * attempt));
+      }
+
+      let response: Response;
       try {
-        const errBody = await response.json();
-        detail = errBody.detail || JSON.stringify(errBody);
-      } catch {}
-      throw new Error(detail);
+        response = await fetch(`${API_URL}/api/profile`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(data),
+        });
+      } catch (networkErr: any) {
+        lastError = new Error('Network error. Please check your connection.');
+        if (attempt < maxRetries) continue;
+        throw lastError;
+      }
+
+      if (!response.ok) {
+        const status = response.status;
+        if ((status === 404 || status >= 500) && attempt < maxRetries) {
+          lastError = new Error('Server temporarily unavailable. Please try again.');
+          continue;
+        }
+        let detail = `Error ${status}`;
+        try {
+          const errBody = await response.json();
+          detail = errBody.detail || JSON.stringify(errBody);
+        } catch {}
+        throw new Error(detail);
+      }
+
+      const updatedUser = await response.json();
+      if (updatedUser) {
+        set({ user: updatedUser });
+      } else {
+        const currentUser = get().user;
+        if (currentUser) set({ user: { ...currentUser, ...data } });
+      }
+      return;
     }
 
-    const updatedUser = await response.json();
-    set({ user: updatedUser });
+    throw lastError;
   },
 }));
