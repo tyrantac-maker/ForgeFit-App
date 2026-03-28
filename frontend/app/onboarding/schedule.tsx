@@ -142,7 +142,7 @@ export default function ScheduleOnboarding() {
       const newDayMuscles: DayMuscles = {};
       for (let i = 1; i <= numDays; i++) {
         const dayIndex = ((i - 1) % Object.keys(split.presetMuscles).length) + 1;
-        newDayMuscles[i] = split.presetMuscles[dayIndex] || [];
+        newDayMuscles[i] = (split.presetMuscles as Record<number, string[]>)[dayIndex] || [];
       }
       setDayMuscles(newDayMuscles);
     }

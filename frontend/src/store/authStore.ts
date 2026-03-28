@@ -28,9 +28,12 @@ export interface User {
   training_location?: string;
   gym_name?: string;
   equipment?: any[];
+  custom_equipment?: any[];
   schedule?: any;
   workout_preferences?: any;
   workout_days?: string[];
+  gym_location?: string;
+  role?: string;
   profile_complete?: boolean;
   onboarding_step?: number;
 }

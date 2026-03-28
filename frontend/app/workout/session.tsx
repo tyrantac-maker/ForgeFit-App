@@ -55,8 +55,8 @@ export default function WorkoutSessionScreen() {
   const [setsProgress, setSetsProgress] = useState<SetProgress[][]>([]);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
 
-  const elapsedTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const restTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const restTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const currentExercise = exercises[currentExerciseIndex];
 

@@ -68,12 +68,10 @@ const styles = StyleSheet.create({
     color: '#76FF00',
     fontSize: 14,
     fontWeight: '700',
-    fontVariant: ['tabular-nums'],
     letterSpacing: 0.5,
   },
   date: {
     color: '#666',
     fontSize: 11,
-    fontVariant: ['tabular-nums'],
   },
 });
