@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BACKEND_URL } from '../config';
 
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+const API_URL = BACKEND_URL;
 
 export interface User {
   user_id: string;

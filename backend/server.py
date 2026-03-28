@@ -1471,6 +1471,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def ensure_admin_account():
+    existing = await db.users.find_one({"email": "admin@forgefit.dev"})
+    if not existing:
+        import uuid as _uuid
+        from datetime import datetime, timezone
+        user_id = f"user_{_uuid.uuid4().hex[:12]}"
+        hashed = hash_password("ForgeFit@2026")
+        await db.users.insert_one({
+            "user_id": user_id,
+            "email": "admin@forgefit.dev",
+            "name": "Admin",
+            "password": hashed,
+            "role": "admin",
+            "created_at": datetime.now(timezone.utc)
+        })
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()

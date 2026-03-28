@@ -1,4 +1,5 @@
-const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import { BACKEND_URL } from '../config';
+const API_URL = BACKEND_URL;
 
 export const fetchWithAuth = async (endpoint: string, token: string, options: RequestInit = {}) => {
   const response = await fetch(`${API_URL}${endpoint}`, {
