@@ -40,7 +40,6 @@ export default function ForgeVideoBackground() {
           style={StyleSheet.absoluteFillObject}
           contentFit="cover"
           nativeControls={false}
-          allowsFullscreen={false}
           allowsPictureInPicture={false}
         />
       </View>

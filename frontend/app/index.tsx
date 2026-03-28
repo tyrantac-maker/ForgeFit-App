@@ -79,7 +79,6 @@ export default function Index() {
           style={StyleSheet.absoluteFillObject}
           contentFit="cover"
           nativeControls={false}
-          allowsFullscreen={false}
           allowsPictureInPicture={false}
         />
       </View>

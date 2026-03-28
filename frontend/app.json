@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "forgefit",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": false,
     "assetBundlePatterns": [
       "assets/**"
     ],
